@@ -1,0 +1,414 @@
+{% extends "../trangchu/header.html" %}
+
+{% load static %}
+{% block js %}
+<script type="text/javascript" src="{% static 'js/ajax_quanlyxuatkkhonhanvienql.js' %}"></script>
+{% endblock %}
+    
+{% block content %}
+    <center class="content_center">
+
+        <div>
+            <center>
+                <a href="{% url 'xuatkho:index' %}" class="easyui-linkbutton" 
+                    style="float: right;margin-right: 30px;width: 130px; height: 30px;" 
+                    data-options="
+                        size:'large',
+                        iconAlign:'top'" 
+                >
+                    Quản lý xuất kho
+                </a>
+            </center>
+        </div>
+    
+        <div id="qlxk-dg"></div>
+    
+        <div id="qlxk-tpx-dlg" style="width: 1521px;height: 600px; height: 90%;padding:10px; margin:auto;">
+    
+            <center>
+                <form action="" id="qlxk-frm_phieuxuat">
+                    {% csrf_token %}
+                    <fieldset style="width:1080px; margin:auto;" id="dorongkhungpx">
+                        <legend style="text-align: center;color: #2263BE;font-size: 25px">Thông tin</legend>
+                        <div style="margin:auto;">
+                           
+                            <div id="capnhat_px_an" style="float: left;height: 60px; margin-right: 10px;font-size: 14px;color: black;">
+                                <select 
+                                    class="easyui-combogrid" 
+                                    id="cbg-quanLySP_sale-tpx-khachhang"
+                                    prompt="Chọn khách hàng:"
+                                    labelPosition="top"
+                                    label="khách hàng:" 
+                                    style="width:200px;"
+                                    name="maKH"
+                                    data-options="
+                                        required:true,
+                                        panelWidth: 700,
+                                        idField: 'MaKH',
+                                        textField: 'Ten',
+                                        pagination:'true',
+                                        rownumbers:'true',
+                                        url: '../khachhangs/dskh?khachhangxk',
+                                        columns: [[
+                                            {field:'Ten',align:'left',title:'<b>Tên khách hàng</b>',width:80},
+                                            {field:'Dienthoai',align:'center',title:'<b>Số điện thoại</b>',width:80},
+                                            {field:'Dc',align:'left',title:'<b>Địa chỉ</b>',width:80,align:'left'},
+                                            {field:'sotien',align:'left',formatter:formatCurrency,title:'<b>Giới hạn công nợ</b>',width:80,align:'left'},
+                                            {field:'nokh',align:'left',formatter:formatCurrency,title:'<b>Nợ còn lại</b>',width:80,align:'left'},
+                                        ]],
+                                        onChange:function(val1,val2){
+                                            var g = $('#cbg-quanLySP_sale-tpx-khachhang').combogrid('grid');  
+                                            g.datagrid('load',{timkiem:val1.trim()});
+                                        },
+                                        onSelect:function(record){
+                                            $makh=$('#cbg-quanLySP_sale-tpx-khachhang').combogrid('getValue');
+                                            var grid = $('#cbg-quanLySP_sale-tpx-khachhang').combogrid('grid');
+                                            var row = grid.datagrid('getSelected'); 
+                                            $('#dckh').html(row.Dc)
+                                            $('#nhanvienkd').combobox('reload', '../nhanviens/dsNV?nhanvien='+$makh)
+                                        },
+                                        fitColumns: true,
+                                        label: 'Chọn khách hàng:',
+                                        labelPosition: 'top',"
+                                ></select>
+                            </div>
+                            
+                            <div id="capnhat_px_an2" style="float: left;height: 60px; margin-right: 10px;font-size: 14px;color: black;">
+                                <input 
+                                    class="easyui-combobox" 
+                                    id="nhanvienkd"
+                                    prompt="Chọn nhân viên kinh doanh"
+                                    labelPosition="top"
+                                    label="Nhân viên kinh doanh:" 
+                                    style="width:200px;"
+                                    name="maNVKD" 
+                                    data-options="valueField:'maNV',
+                                        textField:'tenNV',
+                                        url:'../nhanviens/dsNV',
+                                        onLoadSuccess:function(items){
+                                            if (items.length){
+                                                var opts = $('#nhanvienkd').combobox('options');
+                                                $('#nhanvienkd').combobox('select', items[0][opts.valueField]);
+                                            }
+                                        }"
+                                > 
+                            </div>
+    
+                            <div id="capnhat_px_an" style="float: left;height: 60px; margin-right: 10px;font-size: 14px;color: black;">
+                                <input  
+                                    id="tongthanhnvql" 
+                                    class="easyui-numberbox" 
+                                    label="Tổng phiếu:" 
+                                    data-options=" min:0,groupSeparator:'.',suffix:'VND'"
+                                    labelPosition="top"
+                                    value="tongphieu"
+                                    style="width:200px" 
+                                >
+                            </div>
+    
+                            <div style="float: left;height: 60px; margin-right: 10px;font-size: 14px;color: black;">
+                                <input  
+                                    id="tongtranvql" 
+                                    labelPosition="top"
+                                    label="Tổng trả trước:"
+                                    name="tongthanh" 
+                                    class="easyui-numberbox"
+                                    data-options="groupSeparator:'.',min:0,suffix:'VND', required:true"
+                                    style="width:200px;" 
+                                    value="0"
+                                >
+                            </div>
+    
+                            <div style="float: left;height: 60px; margin-right: 10px;font-size: 14px;color: black;">
+                                <input 
+                                    id="hantraphieuxuatql"
+                                    label="Hạn trả:" 
+                                    labelPosition="top"  
+                                    class="easyui-datebox" 
+                                    name="hantra" 
+                                    data-options="formatter:myformatter,parser:myparser,panelHeight:300" 
+                                    style="width:200px;"
+                                >
+                            </div>
+    
+                            <div style="float: left;height: 60px; margin-right: 10px;font-size: 14px;color: black;">
+                                <select required="true" name="" 
+                                        id="cbb-quanLySP_sale-tpx-hinhthuctt"
+                                        label="Hình thức thanh toán:" 
+                                        labelPosition="top" 
+                                        name="hinhthucthanh" 
+                                        class="easyui-combobox" 
+                                        style="width:200px;" 
+                                        data-options="editable:false,">
+                                            <option value="Chuyển Khoản">Chuyển Khoản</option>
+                                            <option value="Chuyển Khoản +Phí Ship">Chuyển Khoản +Phí Ship</option>
+                                            <option value="Khuyến Mãi + Chuyển khoản">Khuyến Mãi + Chuyển khoản</option>
+                                            <option value="Khuyến Mãi + Chuyển khoản + Phí Ship">Khuyến Mãi + Chuyển khoản + Phí Ship</option>       					    
+                                            <option value="COD">COD</option>
+                                            <option value="COD+Phí Ship">COD+Phí Ship</option>
+                                            <option value="COD+Khuyến Mãi">COD+Khuyến Mãi</option>
+                                            <option value="COD+Khuyến Mãi+Phí Ship">COD+Khuyến Mãi+Phí Ship</option>
+                                            <option value="Tiền Mặt">Tiền Mặt</option>
+                                            <option value="Đổi Trả Hàng">Đổi Trả Hàng</option>
+                                            <option value="Khác(Tặng,chỉ định cty)">Khác(Tặng,chỉ định cty)</option>
+                                            <option value="Hàng Thưởng Doanh Số">Hàng Thưởng Doanh Số</option>
+                                                
+                                </select>
+                            </div>
+    
+                            <div style="float: left;height: 60px; margin-right: 10px;font-size: 14px;color: black; ">
+                                <input 
+                                    id="txtb-quanLySP_sale-tpx-sotk"
+                                    label="Số tài khoản:"
+                                    name="sotaikhoan" 
+                                    labelPosition="top"  
+                                    class="easyui-textbox" 
+                                    style="width:200px;"
+                                >
+                            </div>  
+    
+                            <div  style="float: left;height: 60px; margin-right: 10px;font-size: 14px;color: black;">
+                                <input 
+                                    id="qlxk-ghichu-tpx" 
+                                    name="ghichu" 
+                                    labelPosition="top"
+                                    label="Ghi chú:" 
+                                    class="easyui-textbox"
+                                    style="width:500px;" 
+                                    value=""> 
+                            </div>
+    
+                            <div style="clear: left; ">
+                                <p>                           <span id="dckh" style="color: red;"></span></p>
+                            </div>
+    
+                            <div style="width: 600px; padding-top: 30px;">
+    
+                                <input type="checkbox" checked="checked" id="check_xuatphieu" label="Xuất phiếu" style="width: 20px;float: left; height: 20px;margin-top: 5px;margin-left: 70px"> 
+                                <label style="float: left; font-size: 20px; font-weight: bold; color: #2263BE;margin-top: 3px;margin-left: 5px "> Xuất phiếu </label>
+    
+                                <a class="easyui-linkbutton" 
+                                    data-options="size:'large',iconAlign:'top'" 
+                                    id="btnhuyphieux"
+                                    style="float: right;
+                                    margin-right: 30px;
+                                    width: 100px; height: 30px;" onclick="huyphieuxuatnvqltaophieu()" >Hủy phiếu</a>
+    
+                                <a class="easyui-linkbutton" 
+                                    onclick="capnhatsanphamphieuxuat()" 
+                                    data-options="size:'large',iconAlign:'top'" 
+                                    id="capnhatsanphamphieuxuat" 
+                                    style="width: 100px;
+                                    margin-right: 20px;
+                                    float: right; height: 30px;">Lưu thông tin </a>
+    
+                                <a class="easyui-linkbutton" 
+                                    onclick="$('#qlxk_xuatfile-dlg').dialog('open')" 
+                                    data-options="size:'large',iconAlign:'top'" 
+                                    id="btnthemnvpt"
+                                    style="width: 100px;
+                                    margin-right: 20px;
+                                    float: right; height: 30px;">Thêm NVPT </a> 
+                            </div>                          
+                    </fieldset>
+                </form>
+            </center> 
+    
+
+            <br>
+            <table 
+                id="dg-quanLySP_sale-dsspn" 
+                class="easyui-datagrid" 
+                title="Danh sách sản phẩm xuất" 
+                style=" width:1450px; height:auto;" 
+                fitColumns="true" showFooter="true" pagination="true"
+                rownumbers="true"   
+                data-options=" 
+                    fitColumns:true,
+                    toolbar:'#qlxk-tpx-tlb',
+                    url:'../sanphams/combogrid_sp?mapx=<?php echo $mapx; ?>'"
+            >
+                <thead>
+                    <tr>
+                        <th data-options="field:'' ,width:'300px',checkbox:true"><b></b></th>
+                        <th data-options="field:'tensp' ,width:'300px' "><b>Tên sản phẩm</b></th>
+                        <th data-options="field:'soLxuat',align:'center',editor:'numberbox',"><b>Số lượng</b></th>
+                        <th data-options="field:'giaxuatspnv',align:'right',formatter:formatCurrency"><b>Đơn giá(VNĐ)</b></th>
+                        <th data-options="field:'chietkhau',align:'center',editor:{type:'numberspinner',}"><b>Chiết khấu(%)</b></th> 
+                        <th data-options="field:'thanhtien',width:'100px',align:'right',formatter:formatCurrency"><b>Thành tiền(VNĐ)</b></th> 
+                        <th data-options="field:'soloxuat',align:'center'" width="100px;"><b>Số lô</b>
+                        <th data-options="field:'soqr',align:'center',editor:{type:'text'}" width="100px;"><b>Số QR</b>
+                        <th data-options="field:'tenkho',align:'center'" width="100px;"><b>Kho hàng</b></th>
+                    </tr>
+                </thead>
+            </table> 
+        </div>
+    
+        <!--Toolbar xuất kho-->
+        <div id="qlxk-tpx-tlb" style="height:auto">
+    
+            <label>Quét mã vạch</label>
+            <input type="checkbox" onclick="checkmavach_QLXK()" id="check_mavach" label="Quét mã vạch" style="width:20px; text-align: start; margin-top: 5px; padding-top: 0px; padding-bottom: 0px; height: 16px; line-height: 26px;">
+    
+            <label >Sản phẩm</label>
+            <input  type="text"  id="combogrid-quanLySP_sale-tpx" name="combogrid-quanLySP_sale-tpx" class="easyui-combogrid" fitColumns="true"  labelPosition="top" style="width:300px;" 
+                prompt="nhập maSP hoặc tên SP"
+                data-options="
+                    panelWidth:1000,
+                    idField:'id_xuatkho_sp',
+                    textField:'tensp',
+                    url:'../sanphams/combogrid_sp?nvkho',
+                    pagination:'true',
+                    rownumbers:'true',
+                    columns:[[
+                        {field:'MaSP',title:'<b>Mã sản phẩm</b>',width:120,align:'center'},
+                        {field:'tensp',title:'<b>Tên sản phẩm</b>',width:300},
+                        {field:'gia_ban',title:'<b>Giá Bán (VNĐ)</b>',formatter:formatCurrency,width:120,align:'center'},
+                  
+                        {% if matc != 228 %}
+                            {field:'soluongton',title:'<b>Số lượng hiện tại</b>',width:80,align:'center',},
+                        {% endif %}
+           
+                        {field:'solo',title:'<b>Số lô</b>',width:80,align:'center',},
+                        {field:'Tennsx',title:'<b>nsx</b>',width:80,align:'center',},
+                        {field:'idphantich',title:'<b>idphantich</b>',width:80,align:'center',},
+                        {field:'soqr',title:'<b>Số QR</b>',width:80,align:'center',},
+                        {field:'ngayhethansudung',title:'<b>Ngày hết hạn</b>',width:130,align:'center',},
+                        {field:'tenkho',title:'<b>Kho</b>',width:150}
+                    ]],
+                    onChange:function(val1,val2){
+                        var g = $('#combogrid-quanLySP_sale-tpx').combogrid('grid');   // get datagrid object
+                        g.datagrid('load',{q:val1});
+                        $('#sotiengiam').numberspinner('setValue',0)
+                    }"
+            />
+    
+            <label class="qlxk-mavach" style="display: none;">Mã vạch</label>
+            <input class="qlxk-mavach" type="text" id="qlxk-mavach"  style="width:150px; text-align: start; margin: 0px; padding-top: 0px; padding-bottom: 0px; height: 26px; line-height: 26px; border-radius: 5px; border: 1px solid #e0ecff; display: none;" >
+    
+            <label class="qlxk-mavach_cn" style="display: none;">Mã vạch.</label>
+            <input class="qlxk-mavach_cn" type="text" id="qlxk-mavach_cn"  style="width:150px; text-align: start; margin: 0px; padding-top: 0px; padding-bottom: 0px; height: 26px; line-height: 26px; border-radius: 5px; border: 1px solid #e0ecff; display: none;" >
+    
+            <label class="qlxk-qr">Số QR</label>
+            <input class="qlxk-qr" type="text" id="qlxk-qr"  style="width:150px; text-align: start; margin: 0px; padding-top: 0px; padding-bottom: 0px; height: 26px; line-height: 26px; border-radius: 5px; border: 1px solid #e0ecff;" >
+    
+            <label class="qlxk-qr_cn">Số QR.</label>
+            <input class="qlxk-qr_cn" type="text" id="qlxk-qr_cn"  style="width:150px; text-align: start; margin: 0px; padding-top: 0px; padding-bottom: 0px; height: 26px; line-height: 26px; border-radius: 5px; border: 1px solid #e0ecff; display: none;" >
+    
+            <label> SL</label>
+            <input 
+                style="width:80px" 
+                id="sl_them"  
+                name="sl_them"  
+                type="number"  
+                class="easyui-numberspinner"
+                data-options="min:1,required:true,value:'1',"
+            >
+    
+            <label>Số tiền giảm:</label> 
+            <input style="width:150px"   
+            id="sotiengiam"   
+            name="sotiengiam" 
+            class="easyui-numberspinner"
+            data-options="groupSeparator:'.',
+                onChange:function(val1,val2){
+                    var row = $('#combogrid-quanLySP_sale-tpx').combogrid('grid').datagrid('getSelected');
+                    if(row){
+                        var gia = row.gia_ban;
+                        if(parseInt(gia) < parseInt(val1)){
+                            thongbao('Số tiền giảm phải nhỏ hơn giá sản phẩm')
+                            $('#sotiengiam').numberspinner('setValue',gia)
+                        }
+                        else{
+                            $phantram= ((val1*100)/gia)
+                            $('#chietkhau_them').numberspinner('setValue',$phantram)
+                        }           
+                    }
+                    else{
+                        thongbao('Vui lòng chọn sản phẩm xuất')
+                        $('#combogrid-quanLySP_sale-tpx').combogrid('textbox').focus();
+            
+                    }
+                }"
+            >
+    
+            <label>Chiết khấu:</label> 
+            <input style="width:80px"   
+                id="chietkhau_them" value="0"  
+                name="chietkhau_them" 
+                class="easyui-numberspinner"   
+                data-options="suffix:'%',min:0,max:100,precision:10"
+            > 
+    
+            <a  href="javascript:void(0)" 
+                class="easyui-linkbutton" 
+                data-options="iconCls:'icon-add'" 
+                onclick="luusanpham_QLSP_tpx()"
+                id="luusanpham_QLSP_tpx" 
+            >Lưu sản phẩm</a>
+    
+            <a  href="javascript:void(0)" 
+                class="easyui-linkbutton" 
+                data-options="iconCls:'icon-edit'" 
+                onclick="var row=$('#dg-quanLySP_sale-dsspn').datagrid('getSelected')
+                            $('#fm-capnhatsp').form('load',row)
+                            $('#capnhatsp-dlg').dialog('open')" 
+                id="capnhat_QLSP_tpx" 
+            >Cập nhật sp</a>
+    
+            <a href="javascript:void(0)" 
+                class="easyui-linkbutton" 
+                data-options="iconCls:'icon-remove'" 
+                onclick="delete_QLSP_tpx()"
+            >Xóa</a>
+           
+        </div>
+    
+        <div id="capnhatsp-dlg" title="Thông tin sản phẩm cần cập nhật" class="easyui-dialog" style="width:400px;height:fit-content;padding:10px 20px"
+            closed="true" buttons="#bt-capnhatsp-qlxk">
+            <form id="fm-capnhatsp" method="post">
+                {% csrf_token %}
+                <div class="fitem" style="margin-left: 50px">
+
+                    <input  id="soluong_capnhatsp" class="easyui-numberbox" label="Số lượng:" 
+                        data-options="min:1" name="soLxuat" labelPosition="top"
+                        style="width:250px;height:60px;" 
+                    >
+
+                    <input  id="chietkhau_capnhatsp" name="chietkhau" class="easyui-numberbox" label="Chiết khấu:" 
+                        data-options="suffix:'%',min:0,precision:2"  labelPosition="top"
+                        style="width:250px;height:60px; margin-top: 5px" 
+                    >
+
+                    <input  id="qr_capnhatsp" name="soqr" class="easyui-textbox" 
+                        data-options="label:'Số QR:'" labelPosition="top"
+                        style="width:250px;height:60px; margin-top: 5px" 
+                    >
+                
+                </div>
+                
+                <div>
+                    <a class="easyui-linkbutton" onclick="capnhatthongtinspxk()" data-options="iconCls:'icon-edit'" style="width:auto; margin-left: 140px; margin-top: 20px">Cập nhật</a>
+                </div>
+            </form>
+        </div>
+    
+        <!--dialog xuất file-->
+        <div id="qlxk_xuatfile-dlg" closed="true" class="easyui-dialog" title="Thêm nhân viên phụ trách" style="width:400px;height:150px;padding:10px">
+            <input class="easyui-combobox" 
+                prompt="Chọn nhân viên kinh doanh" 
+                name="congnokh-combobox-customer" 
+                id="nhanvienkdnvpt"
+                style="width:350px;"
+                data-options="valueField:'maNV',
+                    textField:'tenNV',
+                    url:'../nhanviens/dsNV'"
+            >
+            <center>
+                <a href="#" class="easyui-linkbutton"  onclick="themnvptkh()"> Thêm nhân viên</a> 
+                <a href="#" class="easyui-linkbutton"  onclick="$('#qlxk_xuatfile-dlg').dialog('close')"> Thoát</a>    
+            </center>
+        </div>
+
+    </center>
+{% endblock %}

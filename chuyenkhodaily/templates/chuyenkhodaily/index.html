@@ -1,0 +1,230 @@
+{% extends "../trangchu/header.html" %}
+
+{% load static %}
+{% block js %}
+<script type="text/javascript" src="{% static 'js/ajax_quanlychuyenkhodaily_mini.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+    <center class="content_center">
+
+        <table id="qlck-dg" class="easyui-datagrid" title="Quản lý chuyển kho" 
+        style="width: 1521px;height: 600px;"
+        pageSize="20"
+        data-options="
+            rownumbers:true, 
+            singleSelect:true, 
+            url:'taidulieuchuyenkhodaily', 
+            toolbar:'#qlck-tb-dg', 
+            pagination:true,"
+        >
+            <thead>
+                <tr>
+                    <th data-options="field:'id',width:50, align:'center'" ><b>id</b></th>
+                    <th data-options="field:'mapx',width:120, align:'center'" ><b>id PX</b></th>
+                    <th data-options="field:'maphieuxuat',width:150, align:'center'" ><b>Mã PX</b></th>
+                    <th data-options="field:'mapn',width:120,align:'center'" ><b>Mã PN </b></th>
+                    <th data-options="field:'tochuchuyen',width:170"><b>Nơi chuyển</b></th>
+                    <th data-options="field:'tochucnhan',width:170, align:'left'"><b>Nơi nhận</b></th>
+                    <th data-options="field:'ngaychuyen',width:160,align:'center'"><b>Ngày chuyển</b></th>
+                    <th data-options="field:'tinhtrang',width:170,align:'center',
+                        formatter:function(value,row,index){
+                            if(value=='0'){return 'Chưa nhập kho'} else{ return 'Đã nhập kho'}
+                        }"><b>Tình trạng</b></th>
+                    <th data-options="field:'ghichu',width:450,align:'center'"><b>Ghi chú</b></th>
+                    
+                </tr>
+            </thead>
+
+            <tbody>
+                <tr>
+                    <td>92727</td>
+                    <td>XKKG240520001</td>
+                    <td>Phòng IT</td>
+                    <td>khgdjfgha</td>
+                    <td>khgdjfgha</td>
+                    <td>khgdjfgha</td>
+                    <td>2024-05-20 12:27:24</td>
+                    <td>0</td>
+                    <td>Chuyển Khoản</td>
+                </tr>
+            </tbody>
+
+        </table>
+
+        <!--toolbar of the datagrid SẢN PHẨM-->
+        <div id="qlck-tb-dg" style="padding:2px 5px;">
+
+            <a href="#" iconCls="icon-list" onclick="nhapkho_chuyen()" class="easyui-linkbutton">Nhập kho</a>
+            <a onclick="xoaphieuchuyenkhodaily()" class="easyui-linkbutton" data-options="iconCls:'icon-remove'" style="width:auto">Xóa phiếu</a>
+        
+
+            <!--TÌm kiếm theo dữ liệu nhập vào từ textbox-->
+            <input class="easyui-textbox" id="textsearchkho" data-options="prompt:'Tìm mã PX, mã PN',
+                onChange:function(val1,val2){
+                    $searchtext=$('#textsearchkho').textbox('getValue');
+                    if($searchtext==''){
+                        $('#qlck-dg').datagrid('load',{timkiemchuyenkhodaily:val1})
+                    }
+                    else{
+                        $('#qlck-dg').datagrid('load',{timkiemchuyenkhodaily:$searchtext,search:val1});
+                    }
+                
+                }" 
+                style="width:300px;"
+            >
+
+            Từ: <input id="db-QLXK-from" class="easyui-datebox" data-options="formatter:myformatter,parser:myparser,panelHeight:300" style="width:130px;">
+            đến: <input id="db-QLXK-to" class="easyui-datebox" data-options="formatter:myformatter,parser:myparser,panelHeight:300" style="width:130px;">
+
+            <a class="easyui-linkbutton" data-options="iconCls:'icon-search'" style="width:auto" onclick="
+                $searchtext=$('#textsearchkho').textbox('getValue');
+                $bien={timkiemphieuxuat_nhap:''}
+                timkiemkethop('db-QLXK-from','db-QLXK-to','qlck-dg',$bien)
+            ">Tìm kiếm</a>
+
+            <a  class="easyui-linkbutton" iconCls="icon-reload" onclick="$('#qlck-dg').datagrid('load',{load:''})"  >Tải lại</a>
+
+        </div>
+
+        <!--dialog thông tin nhập kho-->
+        <div id="qlnk-thongtin-dlg" class="easyui-dialog" title="NHẬP KHO" data-options="" closed="true" modal="true" style="width:1000px;height: 49%;padding:30px">
+            <h2 style="text-align: center;color: #2263BE;">THÔNG TIN NHẬP KHO</h2>
+            <form id="qlnk-frm_thongtin">
+                {% csrf_token %}
+                <center>
+                    <table style=" width: 90%;height: 50%">
+                        <tr>
+                            <td>
+                                <fieldset style="width:600px;  ">
+                                    <legend style="text-align: center;color: #2263BE;">Thông tin</legend>
+                                    <table>
+                                        <tr>
+                                            <td>
+                                                <select id="qlnk-phieunhap-nguoncap-cbb" class="easyui-combogrid" style="width:200px;margin-top: 20px;height: 50px;" name="manguonCC" labelWidth="150px" data-options="
+                                                    required:true,
+                                                    panelWidth: 600,
+                                                    idField: 'Mansx',
+                                                    textField: 'Tennsx',
+                                                    url: '../nhapkhos/taidulieunhapkho?nhacungcap',
+                                                    columns: [[
+                                                        {field:'Tennsx',align:'left',title:'<b>Tên NCC</b>',width:80},
+                                                        {field:'Sdt',align:'center',title:'<b>Số điện thoại</b>',width:120},
+                                                        {field:'diachi',align:'left',title:'<b>Địa chỉ</b>',width:80,align:'left'},
+                                                    ]],
+                                                    fitColumns: true,
+                                                    label: 'Chọn nguồn cấp:',
+                                                    labelPosition: 'top',"
+                                                >                                      
+                                                </select>
+                                            </td>
+                                            <td>
+                                                <select required="true" name="" 
+                                                    id="khonhanvienquanlykho_sp"
+                                                    label="Kho:" 
+                                                    labelPosition="top"
+                                                    name="language" 
+                                                    class="easyui-combobox" 
+                                                    style="width:200px;height:50px; " 
+                                                    data-options="
+                                                        url:'../nhapkhos/taidulieukho?makhonv',
+                                                        prompt:'Vui lòng chọn kho',
+                                                        labelWidth:'auto',
+                                                        valueField:'makho',
+                                                        textField:'tenkho'"
+                                                >
+                                                </select>
+                                            </td>
+                                            <td>
+                                                <input id="qlnk-ngaythanhtieptheo-datebox"
+                                                label="Ngày thanh tiếp theo:" 
+                                                name="ngaytratieptheo"
+                                                labelPosition="top"  
+                                                class="easyui-datebox" 
+                                                data-options="formatter:myformatter,parser:myparser" 
+                                                style="width:200px; height:50px">
+
+                                            </td>
+                                            <td>
+                                                <input  id="qlnk-tongtratruoc-nbb" 
+                                                labelPosition="top"
+                                                label="Tổng trả trước:"
+                                                name="tratruoc" 
+                                                class="easyui-numberbox"
+                                                style="width:200px;height:50px;" 
+                                                value="0">
+
+                                            </td>
+                                            
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <select required="true" name="" 
+                                                    id="qlnk-hinhthucthanh-cbb"
+                                                    label="Hình thức thanh toán:" 
+                                                    labelPosition="top"
+                                                    name="hinhthucthanh" 
+                                                    class="easyui-combobox" 
+                                                    style="width:200px;height:50px; " 
+                                                    data-options="editable:false,"
+                                                >
+                                                    <option value="Tiền Mặt">Tiền Mặt</option>
+                                                    <option value="Đổi Trả">Đổi Trả</option>
+                                                    <option value="Chuyển Khoản">Chuyển Khoản</option>
+                                                    <option value="Khác">Khác</option>
+                                                </select>
+                                            </td>
+                                            <td>
+                                                <input id="qlnk-stk-txtb"
+                                                label="Số tài khoản:" 
+                                                labelPosition="top"  
+                                                class="easyui-textbox" 
+                                                style="width:200px;height: 50px;"
+                                                disabled="true" required="true">
+                                            </td> 
+                                            <td colspan="2">
+                                                <input id="qlnk-ghichu-txtb" 
+                                                labelPosition="top"
+                                                label="Ghi chú:" 
+                                                class="easyui-textbox"
+                                                style="width:400px;height:50px;" 
+                                                value=""> 
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td colspan="5">
+                                                <a class="easyui-linkbutton" data-options="
+                                                    iconAlign:'top',
+                                                    onClick:function(){
+                                                        $('#qlnk-phieunhap-dlg').dialog('close');
+                                                    }" 
+                                                    style="float: right;
+                                                    margin-top: 20px;
+                                                    margin-right: 30px;
+                                                    margin-right: 35%;
+                                                    width: 100px;" >Hủy phiếu
+                                                </a>
+
+                                                <a class="easyui-linkbutton" 
+                                                    id="nhapkho_chuyen" 
+                                                    data-options="size:'small',iconAlign:'top'" 
+                                                    style="width: 100px;
+                                                    margin-top:20px;
+                                                    margin-right: 20px;
+                                                    float: right;">Nhập kho 
+                                                </a>
+                                            </td> 
+                                        </tr>                         
+                                    </table>
+                                </fieldset>
+                            </td>
+                        </tr>
+                    </table>
+                </center> 
+            </form>
+        </div>
+
+    </center>
+{% endblock %}
+
+

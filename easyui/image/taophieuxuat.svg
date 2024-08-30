@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Creator: CorelDRAW X8 -->
+<svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" width="213px" height="213px" version="1.1" style="shape-rendering:geometricPrecision; text-rendering:geometricPrecision; image-rendering:optimizeQuality; fill-rule:evenodd; clip-rule:evenodd"
+viewBox="0 0 85 85"
+ xmlns:xlink="http://www.w3.org/1999/xlink">
+ <defs>
+  <style type="text/css">
+   <![CDATA[
+    .fil3 {fill:#103453}
+    .fil5 {fill:#404656}
+    .fil4 {fill:#545E73}
+    .fil15 {fill:#5E5E5E}
+    .fil7 {fill:#8697CB}
+    .fil13 {fill:#A34740}
+    .fil8 {fill:#D5D0BB}
+    .fil12 {fill:#D6C4B1}
+    .fil10 {fill:#D75A4A}
+    .fil14 {fill:#E18C25}
+    .fil9 {fill:#EDDCC7}
+    .fil6 {fill:#EFEBDE}
+    .fil11 {fill:#F29C21}
+    .fil1 {fill:url(#id0)}
+    .fil2 {fill:url(#id1)}
+    .fil0 {fill:url(#id2)}
+   ]]>
+  </style>
+  <radialGradient id="id0" gradientUnits="userSpaceOnUse" gradientTransform="matrix(0.830202 0.479331 -3.83466 6.64181 76 -120)" cx="33.6631" cy="18.3455" r="28.4543" fx="33.6631" fy="18.3455">
+   <stop offset="0" style="stop-opacity:1; stop-color:#205983"/>
+   <stop offset="1" style="stop-opacity:1; stop-color:#0A2742"/>
+  </radialGradient>
+  <radialGradient id="id1" gradientUnits="userSpaceOnUse" gradientTransform="matrix(-0.60081 0.516926 2.77508 7.16268 -40 -387)" xlink:href="#id0" cx="73.355" cy="56.6489" r="51.8981" fx="73.355" fy="56.6489">
+  </radialGradient>
+  <radialGradient id="id2" gradientUnits="userSpaceOnUse" gradientTransform="matrix(0.77882 0.449257 -3.59732 6.22509 157 -232)" xlink:href="#id0" cx="34.2173" cy="41.5079" r="132.339" fx="34.2173" fy="41.5079">
+  </radialGradient>
+ </defs>
+ <g id="Layer_x0020_1">
+  <metadata id="CorelCorpID_0Corel-Layer"/>
+  <path class="fil0" d="M61 77c0,0 -1,1 -1,1l0 4 -53 0 0 -50 53 0 0 7c0,1 1,1 1,1 1,0 2,0 2,-1l0 -7 3 0 0 0c1,0 1,0 1,-1 0,0 0,-1 -1,-1l-32 -30c0,0 -1,0 -1,0l-33 30c0,0 0,1 0,1 0,1 1,1 1,1l3 0 0 51c0,1 1,2 2,2l55 0c1,0 2,-1 2,-2l0 -5c0,0 -1,-1 -2,-1l0 0zm-27 -74l29 27c-36,0 -26,0 -58,0l29 -27 0 0z"/>
+  <path class="fil1" d="M34 28c5,0 9,-4 9,-9 0,-5 -4,-9 -9,-9 -5,0 -9,4 -9,9 0,5 4,9 9,9zm0 -16c3,0 6,3 6,7 0,4 -3,6 -6,6 -4,0 -7,-2 -7,-6 0,-4 3,-7 7,-7z"/>
+  <path class="fil2" d="M83 42c1,0 2,1 2,2l0 30c0,1 -1,2 -2,2l-21 0c-1,0 -1,-1 -1,-2l0 -3 2 0 0 2 19 0 0 -28 -19 0 0 3 -2 0 0 -4c0,-1 0,-2 1,-2l21 0 0 0z"/>
+  <path class="fil3" d="M52 65l14 0 0 4 14 -9 -14 -10 0 5 -14 0 0 10zm3 -3l14 0 0 3 8 -5 -8 -6 0 3 -14 0 0 5 0 0z"/>
+  <g id="_1590579827744">
+   <g>
+    <polygon class="fil4" points="34,36 31,36 31,39 24,39 24,36 21,36 10,36 10,78 45,78 45,36 "/>
+    <rect class="fil5" x="24" y="35" width="6.69508" height="3.71939"/>
+    <polygon class="fil6" points="36,39 36,41 19,41 19,39 12,39 12,76 43,76 43,39 "/>
+    <polygon class="fil7" points="31,36 31,39 24,39 24,36 19,36 19,41 36,41 36,36 "/>
+    <path class="fil8" d="M27 47l-10 0c-1,0 -1,0 -1,-1 0,0 0,-1 1,-1l10 0c0,0 0,1 0,1 0,1 0,1 0,1z"/>
+    <path class="fil8" d="M27 70l-10 0c-1,0 -1,0 -1,-1 0,0 0,-1 1,-1l10 0c0,0 0,1 0,1 0,1 0,1 0,1z"/>
+    <path class="fil8" d="M38 51l-21 0c-1,0 -1,0 -1,0 0,-1 0,-1 1,-1l21 0c1,0 1,0 1,1 0,0 0,0 -1,0z"/>
+    <path class="fil8" d="M38 60l-21 0c-1,0 -1,0 -1,0 0,-1 0,-1 1,-1l21 0c1,0 1,0 1,1 0,0 0,0 -1,0z"/>
+    <path class="fil8" d="M38 66l-21 0c-1,0 -1,-1 -1,-1 0,-1 0,-1 1,-1l21 0c1,0 1,0 1,1 0,0 0,1 -1,1z"/>
+    <path class="fil8" d="M27 56l-10 0c-1,0 -1,-1 -1,-1 0,0 0,-1 1,-1l10 0c1,0 1,1 1,1 0,0 0,1 -1,1z"/>
+    <path class="fil8" d="M38 56l-5 0c0,0 -1,-1 -1,-1 0,0 1,-1 1,-1l5 0c1,0 1,1 1,1 0,0 0,1 -1,1z"/>
+    <path class="fil8" d="M30 56c0,0 0,0 0,0 0,-1 0,-1 0,-1 0,0 0,0 0,0 0,-1 1,-1 1,0 0,0 0,0 0,0 0,0 0,0 0,1 0,0 -1,0 -1,0z"/>
+   </g>
+   <g>
+    <polygon class="fil9" points="34,72 34,72 32,77 36,74 "/>
+    <path class="fil10" d="M48 61l-1 0c0,-1 -1,-1 -2,0l-2 2 1 2 4 -4z"/>
+    <rect class="fil11" transform="matrix(0.0305932 0.0305931 -0.0305932 0.0305931 42.5119 63.1716)" width="64.4247" height="282.396"/>
+    <polygon class="fil12" points="38,76 38,76 36,74 32,77 32,78 "/>
+    <path class="fil13" d="M47 67l2 -2c1,-1 1,-2 0,-2l-1 -2 -4 4 3 2z"/>
+    <rect class="fil14" transform="matrix(-0.0305932 -0.0305931 0.0305932 -0.0305931 38.08 76.0195)" width="73.1343" height="282.396"/>
+    <path class="fil15" d="M32 79c0,0 -1,0 -1,0 0,-1 0,-1 0,-1l2 -2c0,0 1,0 1,0 0,0 0,1 0,1l-2 2c0,0 0,0 0,0z"/>
+   </g>
+  </g>
+ </g>
+</svg>

@@ -1,0 +1,446 @@
+{% extends "../trangchu/header.html" %}
+
+{% load static %}
+{% block js %}
+<script type="text/javascript" src="{% static 'js/ajax_quanlykhachhang_mini.js' %}"></script>
+<script>
+        $(function(){
+            $('#dg').datagrid(
+                {
+                url: 'http://127.0.0.1:8000/api/danhsachKH/',  // URL để gửi yêu cầu AJAX
+                method: 'get',
+                onLoadSuccess: function(data) {
+                    console.log('Data loaded successfully:', data);
+                },
+                onLoadError: function() {
+                    console.log('Error loading data');
+                }
+            }
+            ).datagrid('clientPaging');
+        });
+
+
+        $(function(){
+            $('#nhanvienpt_dg').datagrid(
+                {
+                url: 'http://127.0.0.1:8000/api/taidulieunvpt/',  // URL để gửi yêu cầu AJAX
+                method: 'get',
+                onLoadSuccess: function(data) {
+                    console.log('Data loaded successfully:', data);
+                },
+                onLoadError: function() {
+                    console.log('Error loading data');
+                }
+            }
+            ).datagrid('clientPaging');
+        });
+    </script>
+{% endblock %}
+
+{% block content %}
+    <center class="content_center">
+
+        <div id="noidungnhanvien">
+            <table id="dg" title="Quản lý khách hàng" class="easyui-datagrid" 
+                style="width: 1521px;height: 600px;"
+                pageSize="20"
+                url=""
+                toolbar="#toolbar" pagination="true"
+                rownumbers="true" fitColumns="true" singleSelect="true"
+            >
+                <thead>
+                    <tr>
+                        <th field="MaKH" width="50"><b>Mã KH</b></th>
+                        <th field="Ten" width="130"><b>Tên Khách Hàng</b></th>
+                        <th field="Diachi_nharieng" width="90"><b>Công ty/Spa</b></th>
+                        <th field="Dienthoai" width="100"><b>Số ĐT</b></th>
+                        <th field="Dc" width="220"><b>Địa chỉ</b></th>
+                        <th field="tenhuyen" width="90"><b>Quận/Huyện</b></th>
+                        <th field="tentinh" width="90"><b>Tỉnh</b></th>
+                        <th field="Tennhomkh"width="100"> <b>Cấp bậc</b></th>
+                        <th field="tennhanvien" width="120"><b>Nhân viên KD</b>
+                        <th field="Mota"width="100"><b>Ghi chú</b></th>
+                        <th field="ngaytao" width="100"><b>Ngày tạo</b></th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+    
+        <div id="toolbar">
+
+            <a href="#" class="easyui-linkbutton" iconCls="icon-add"  onclick="themKhachhang()" >Thêm KH</a>
+            <a href="#" class="easyui-linkbutton" iconCls="icon-edit"  onclick="capNhatKH()" >Chỉnh sửa KH</a>
+            <a href="#" class="easyui-linkbutton" iconCls="icon-remove" onclick="xoaKH()" id="xoa">Xóa KH</a>
+            <a href="#" class="easyui-linkbutton" iconCls="icon-list" onclick="nhanvienpt()">Nhân viên phụ trách</a>
+    
+            <input class="easyui-combobox" 
+                prompt="Chọn nhân viên kinh doanh" name="congnokh-combobox-customer" 
+                style="width:200px;"
+                id="nhanvienkd_kh" 
+                data-options="valueField:'maNV',
+                    textField:'tenNV',
+                    url:'../nhanvien/dsNV/'
+            "> 
+    
+            <input class="easyui-combobox" prompt="Chọn cấp bậc khách hàng" name="capbackh-combobox-customer" 
+                style="width:200px;"
+                id="capbac_kh" 
+                data-options="valueField:'Manhomkh',
+                    textField:'Tennhomkh',
+                    url:'../khachhang/dsnhomKH/'
+            ">
+    
+            <input type="text" placeholder="Tìm kiếm..."  name="tim" id="tim" class="easyui-validatebox tb" style="height:29px;width:220px;border-radius:5px;border:1px solid #95b8e7;">
+            <a href="#" class="easyui-linkbutton" iconCls="icon-search"  id="timKH" onclick="timKH()">Tìm</a>
+    
+            <a class="easyui-linkbutton l-btn l-btn-small" iconcls="excel_icon" onclick="xuatdanhsachkhtheotimkiem()">Xuất danh sách</a>
+    
+            <span class="easyui-linkbutton" iconCls="icon-phancapkh" onclick="phancapkh()">Phân cấp khách hàng</span>
+    
+            <a href="#" class="easyui-linkbutton" onclick="baoSN()">Báo sinh nhật</a>
+    
+            <a href="#" class="easyui-linkbutton" iconCls="icon-save"  onclick="importKH()">Thêm file</a>
+    
+        </div>
+    
+        <!-- themkhachhang -->
+        <div id="dlg" 
+            class="easyui-dialog" 
+            style="width:100%;min-height:400px;padding:10px 20px; margin-top: 20px"
+            closed="true" 
+            buttons="#dlg-buttons"
+            data-options="modal:true"
+        >
+            <center><div class="ftitle"><h2>THÔNG TIN KHÁCH HÀNG</h2></div></center>
+            <form id="fm" method="post" >
+                {% csrf_token %}
+                <!-- thong tin khach hang -->
+                <div class="thongtinKH">
+                    <fieldset>
+                        <legend>Thông Tin Khách hàng</legend>
+                        <table>
+                            <tr>
+                                <td ><label><b>Tên KH</b></label></td>
+                                <td><input required="required" name="Ten" style="width: 100%;height: 27px; border-radius:5px;border:1px solid #95b8e7; "  class="easyui-validatebox"  id="tenKH" ></td>
+                            </tr>
+                            <tr>
+                                <td><label><b>Giới Tính</b></label></td>
+                                <td>
+                                    <select required="required" name="Gioitinh" id="gioiTinh" style="width: 100%;height: 27px; border-radius:5px;border:1px solid #95b8e7;margin-top: 3px">
+                                        <option value="Nữ">
+                                            Nữ	
+                                        </option>
+                                        <option value="Nam">
+                                            Nam	
+                                        </option>
+                                    </select>
+                                </td>
+                            </tr>
+    
+                            <tr>
+                                <td><label><b>Số ĐT:</b></label></td>
+                                <td><input required="required" name="Dienthoai" id="soDT" style="width: 100%;height: 27px; border-radius:5px;border:1px solid #95b8e7;margin-top: 3px"  class="easyui-validatebox"  ></td>
+                            </tr>
+                            <tr>
+                                <td><label><b>Địa Chỉ</b></label></td>
+                                <td><input required="required"  name="Dc" id="diachi" style="width: 100%;height: 27px; border-radius:5px;border:1px solid #95b8e7;margin-top: 3px"  class="easyui-validatebox" ></td>
+                            </tr>
+                            <tr style="margin-top: 5px">
+                                <td><label><b>Tỉnh:</b></label></td>
+                                <td><input name="Matinh" style="width: 100%;height: 30px; border-radius:5px;border:1px solid #95b8e7;margin-top: 5px"   class="easyui-combobox" required="required" id="tinh"
+                                    data-options="
+                                        valueField: 'provinceid', 
+                                        textField: 'name', 
+                                        url: '{% url "khachhang:danhsachtinh" %}',
+                                        onChange:function(val1,val2){
+                                            dsh()
+                                        }"
+                                >
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><label><b>Quận/Huyện:</b></label></td>
+                                <td>
+                                    <input required="required" name="Mahuyen" id="huyen" style="width: 100%;height: 30px; border-radius:5px;border:1px solid #95b8e7;margin-top: 3px"  class="easyui-combobox" 
+                                    data-options="
+                                        mode:'remote',
+                                        valueField: 'districtid',
+                                        textField: 'name', 
+                                        url: '{% url "khachhang:danhsachhuyen" %}',
+                                        queryParams: {
+                                            maDon: ''  // Đặt giá trị mặc định cho maDon
+                                        }"
+                                >
+                                </td>
+                            </tr>
+                            <tr>
+                                <td ><label><b>Người Phụ Trách:</b></label></td>
+                                <td>
+                                    <input required="required" name="maNV" style="width: 100%;height: 30px; border-radius:5px;border:1px solid #95b8e7;margin-top: 3px"  id="npt" class="easyui-combobox" 
+                                        data-options="
+                                            url:'{% url "khachhang:nguoipt" %}',
+                                            valueField: 'maNV',
+                                            textField: 'tenNV'"
+                                    />
+                                </td>
+                            </tr>
+                            <tr >
+                                <td><label><b>Công ty/spa:</b></label></td>
+                                <td><input name="Diachi_nharieng" style="width: 100%;height: 30px; border-radius:5px;border:1px solid #95b8e7;margin-top: 3px"  id="diachinr" class="easyui-validatebox"></td>
+                            </tr>
+                            <tr style="display: none;">
+                                <td><label><b>Mã Số Thuế:</b></label></td>
+                                <td><input name="Mathue" id="mST" style="width: 100%;height: 30px; border-radius:5px;border:1px solid #95b8e7"  class="easyui-validatebox" 
+                                    data-options="validType:['number']">
+                                </td>
+    
+                            </tr>    
+                        </table>
+                    </fieldset>
+                </div>	
+                <!-- thong tin lien he -->
+                <div class="thongtinKH">
+                    <fieldset>
+                        <legend>Thông Tin Liên Hệ</legend>
+                        <table >
+                            <tr>
+                                <td><label><b>Ngày sinh:</b></label></td>
+                                <td><input name="ngaysinh" id="ngaySinh" class="easyui-datebox" data-options="panelHeight:300" style="width: 100%;height: 30px; border-radius:5px;border:1px solid #95b8e7;margin-top: 3px"  ></td>
+                            </tr>
+                            <tr>
+                                <td><label><b>Fax:</b></label></td>
+                                <td><input name="Fax" id="fax" style="width: 100%;height: 30px; border-radius:5px;border:1px solid #95b8e7;margin-top: 3px"  class="easyui-validatebox" ></td>
+                            </tr>
+    
+                            <tr>
+                                <td><label><b>Email:</b></label></td>
+                                <td><input name="Email" style="width: 100%;height: 30px; border-radius:5px;border:1px solid #95b8e7;margin-top: 3px"  id="Email" class="easyui-validatebox"  validType="email"></td>
+                            </tr>
+                            <tr>
+                                <td><label><b>Sở thích KH:</b></label></td>
+                                <td><textarea cols="33" rows="2" name="Sothich" id="sothich" style="width: 100%;height: 30px; border-radius:5px;border:1px solid #95b8e7;margin-top: 3px" ></textarea></td>
+                            </tr>
+    
+                            <tr>
+                                <td><label><b>Nghề nghiệp:</b></label></td>
+                                <td><input name="Chucvu" class="easyui-validatebox" style="width: 100%;height: 30px; border-radius:5px;border:1px solid #95b8e7;margin-top: 3px" id="cv" ></td>
+                            </tr>
+                        
+                            <tr >
+                                <td><label><b>Ghi chú:</b></label></td>
+                                <td><input name="Mota" class="easyui-validatebox" style="width: 100%;height: 30px; border-radius:5px;border:1px solid #95b8e7;margin-top: 3px"  id="mt" ></td>
+                            </tr>
+    
+                        </table>
+                    </fieldset>
+                </div>	
+                <!-- thong tin cham soc khach hang  -->
+                <div class="thongtinKH">
+                    <fieldset>
+                        <legend>Theo Dõi Khách Hàng</legend>
+                        <table>
+                            <tr>
+                                <td><label><b>Người Giới Thiệu:</b></label></td>
+                                <td><input name="Nguoigioithieu" class="easyui-validatebox" style="width: 100%;height: 30px; border-radius:5px;border:1px solid #95b8e7;margin-top: 3px"  id="ngt" ></td>
+                            </tr>
+                            <tr>
+                                <td><label><b>Nhóm KH:</b></label></td>
+                                <td>
+                                    <input  name="Manhom" required="required" style="width: 100%;height: 30px; border-radius:5px;border:1px solid #95b8e7;margin-top: 3px"   id="nkh" class="easyui-combobox" 
+                                        data-options="
+                                            valueField: 'Manhomkh',
+                                            textField: 'Tennhomkh', 
+                                            url: '{% url "khachhang:nhomkh" %}',
+                                            onLoadSuccess:function(items){
+                                                if (items.length){
+                                                    var opts = $('#nkh').combobox('options');
+                                                    $('#nkh').combobox('select', items[1][opts.valueField]);
+                                                }
+                                            }"
+                                    >
+    
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><label><b>Nguồn KH:</b></label></td>
+
+                                <td><input required="required" style="width: 100%;height: 30px; border-radius:5px;border:1px solid #95b8e7;margin-top: 3px"  id="nguonkh" name="maNguonKH" class="easyui-combobox" 
+
+                                    data-options="
+
+                                        url: '{% url "khachhang:dsnguonKH" %}',editable:false,
+                                        valueField: 'maNguon',
+                                        textField: 'tenNguon',
+                                        onLoadSuccess:function(items){
+                                            if (items.length){
+                                                var opts = $('#nguonkh').combobox('options');
+                                                $('#nguonkh').combobox('select', items[2][opts.valueField]);
+                                            }
+                                        }"/>
+                                </td>
+    
+                            </tr>
+                            <tr>
+                                <td><label><b>Mối Quan Hệ</b></label></td>
+                                <td>
+                                    <input id="mqhkh" class="easyui-combobox" required="required" style="width: 100%;height: 30px; border-radius:5px;border:1px solid #95b8e7;margin-top: 3px"  name="maMQHe" 
+                                        data-options="
+                                            url:'{% url "khachhang:moiqh" %}', editable:false,
+                                            valueField: 'maMQH',
+                                            textField: 'TenMQH',
+                                            onLoadSuccess:function(items){
+                                                if (items.length){
+                                                    var opts = $('#mqhkh').combobox('options');
+                                                    $('#mqhkh').combobox('select', items[0][opts.valueField]);
+                                                }
+                                            }"/>
+                                </td>
+                            </tr>
+                        </table>
+                    </fieldset>
+                </div>			
+            </form>
+            <div id="thongbaonhanvien"></div>
+    
+            <div id="dlg-buttons">
+                <a href="#" class="easyui-linkbutton" iconCls="icon-save" id="luuKH"><b>Lưu</b></a>
+                <a href="#" class="easyui-linkbutton" iconCls="icon-ok"  id="capnhatKH"><b>Cập nhật</b></a>
+                <a href="#" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#dlg').dialog('close');$('#dg').datagrid('reload');"><b>Thoát</b></a>
+            </div>
+        </div>
+    
+        <!-- nhân viên phụ trách -->
+        <div id="dlg-buttonsSN" title="Danh sách nhân viên phụ trách">
+            <a href="#" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#dlg_sinhnhat').dialog('close');"><b>Đóng</b></a>
+        </div>
+        
+        <div id="dlg_nhanvienphutrach" title="Danh sách nhân viên phụ trách" 
+            class="easyui-dialog" 
+            style=" width:700px; min-height:400px; padding:10px 20px"
+            closed="true" 
+            buttons="#dlg-buttonnhanvienphutrach"
+            url=""
+        >
+            <br>
+            <table title="Nhân viên phụ trách" 
+                id="nhanvienpt_dg" 
+                class="easyui-datagrid" style="width:100%;height:500px "
+                url=""
+                pagination="true"
+                rownumbers="true" 
+                fitColumns="true" 
+                singleSelect="true"
+                toolbar="#toolbarnvpt"
+            >
+                <thead>
+                    <tr>
+                        <th field="Sdt"><b>Số ĐT</b></th>
+                        <th field="tenNV"><b>Tên Nhân Viên</b></th>
+                        <th field="ngaySinh"><b>Ngày sinh</b></th>
+                        <th field="gioiTinh" ><b>Giới tính</b></th>
+                        <th field="ngayphutrach" ><b>Ngày phụ trách</b></th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+    
+        <div id="dlg-buttonnhanvienphutrach">
+            <a href="#" 
+                class="easyui-linkbutton" 
+                iconCls="icon-cancel" 
+                onclick="javascript:$('#dlg_nhanvienphutrach').dialog('close');"><b>Đóng</b>
+            </a>
+        </div>
+    
+        <div id="toolbarnvpt">
+            <input   class="easyui-combobox" 
+                prompt="Chọn nhân viên kinh doanh" 
+                name="congnokh-combobox-customer" 
+                id="nhanvienkdnvpt"
+                style="width:300px;"
+                data-options="valueField:'maNV',
+                    textField:'tenNV',
+                    url:'../nhanvien/dsNV/'"
+            > 
+            <a href="#" class="easyui-linkbutton" iconCls="icon-add" onclick="themnvpt()"> Thêm nhân viên</a>
+            <a href="#" class="easyui-linkbutton" iconCls="icon-remove" onclick="xoanvpt()">Xóa</a>
+        </div>
+    
+        <!--dialog phan cap khach hang-->
+        <div id="phancapkhachhang_dlg" class="easyui-dialog" title="Thông tin phân cấp khách hàng" data-options="" closed="true" style="width:100%;height: 90%;padding:10px">
+            <br>
+            <table id="phancapkh_dg" class="easyui-datagrid" title="Danh sách phân cấp khách hàng"
+                style=" width:99%; height:auto" 
+                fitColumns="true" showFooter="true" pagination="true"
+                rownumbers="true"  
+                showFooter="true"
+                url="../khachhang/taiduphancapkh/"
+                data-options=" 
+                    fitColumns:true,
+                    toolbar:'#toolbar_phancapkhachhang',
+                    singleSelect: true"
+                pagesize="20"
+            >
+                <thead>
+                    <tr>
+                        <th data-options="field:'makh',width:50"><b>Mã KH</b></th>
+                        <th data-options="field:'Ten',width:80"><b>Tên khách hàng</b></th>
+                        <th data-options="field:'Tennhomkh',width:100"><b>Cấp bậc</b></th>
+                        <th data-options="field:'ngay',width:130"><b>Ngày</b></th>
+                    </tr>
+                </thead>
+            </table> 
+        </div>
+    
+        <!--toolbar chi tiết phan cap khach hàng-->
+        <div id="toolbar_phancapkhachhang">
+
+            <input class="easyui-combobox" prompt="Lựa chọn khách hàng" name="congnokh-combobox-customer" 
+                style="width:250px;"
+                id="khachphancap" 
+                data-options="valueField:'MaKH',
+                    textField:'Ten',
+                    url:'../khachhang/khachhangpckh/',
+                    onChange: function(newval,oldval){
+                        $('#qlxk-dg').datagrid('load',{timkiemphieuxuatkhct:newval});
+                    }"
+            >
+
+            <input type="radio" name="phancap" id="captren" value="captren" checked="checked" onclick="taidulieucaptren()"> Cấp trên
+            <input type="radio" name="phancap" id="capduoi" value="capduoi" onclick="taidulieucapduoi()"> Cấp dưới
+            <a href="#" class="easyui-linkbutton" iconCls="icon-add" style="margin-left: 5px"  onclick="themphancapkh()" >Thêm</a>
+            <a href="#" class="easyui-linkbutton" iconCls="icon-remove"  style="margin-left: 5px" onclick="xoaphancapkh()" id="xoa">Xóa</a>
+        </div>
+    
+        <!-- bao sinh nhat -->
+        <div id="dlg_sinhnhat" 
+            class="easyui-dialog" 
+            style=" width:700px; min-height:400px; padding:10px 20px"
+            closed="true" 
+            buttons="#dlg-buttonsSN"
+            url="../khachhang/taiDuLieuSN/"
+        >
+            <center>
+                <div class="ftitle"><h2>DANH SÁCH SINH NHẬT KHÁCH HÀNG</h2></div>
+            </center>
+    
+            <table  title="Quản lý sinh nhật khách hàng" class="easyui-datagrid" style="width:100%;height:500px "
+                url="../khachhang/taiDuLieuSN/"
+                pagination="true"
+                rownumbers="true" fitColumns="true" singleSelect="true">
+                <thead>
+                    <tr>
+                        <th field="Ten">Tên Khách Hàng</th>
+                        <th field="Namsinh">Ngày sinh</b></th>
+                        <th field="Gioitinh" >Giới tính</th>
+                        <th field="Dienthoai">Số ĐT</th>
+                        <th field="Dc">Địa chỉ</b></th>
+                    </tr>
+                </thead>
+            </table>
+            
+        </div>
+
+    </center>
+{% endblock %}
+   

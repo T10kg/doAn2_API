@@ -1,0 +1,145 @@
+{% extends "../trangchu/header.html" %}
+
+{% load static %}
+{% block js %}
+<script type="text/javascript" src="{% static 'js/ajax_tochuc_mini.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+    <center class="content_center">
+
+        <div class="easyui-panel easyui-fluid"  style="width: 1521px;height: 600px;" data-options="
+            title:'Thông tin tổ chức',
+            collapsible:true"
+        >
+
+            <table class="easyui-datagrid" id="dg" style="width: 100%;height: 95%;" data-options="
+                url:'taidulieutochuc',
+                fitColumns:true,
+                toolbar:'#toolbar_tochuc',
+                rownumbers:true,
+                singleSelect:true,
+                pagination:true"
+            >
+                <thead>
+                    <tr>
+                        <th field="id" width="30"><b>id</b></th>
+                        <th field="tenTC" width="100"><b>Tên Tổ Chức</b></th>
+                        <th field="diachi" width="100"><b>Địa chỉ</b></th>
+                        <th field="quanly" width="100"><b>Quản lý</b></th>
+                        <th field="ghichu" width="70"><b>Ghi chú</b></th>         
+                    </tr>
+                </thead>
+
+                <tbody>
+                    <tr>
+                        <td>6170</td>
+                        <td>VP2</td>
+                        <td>VP2</td>
+                        <td>0376850175</td>
+                        <td>Cần Thơ</td>
+                    </tr>
+                </tbody>
+
+            </table>
+
+
+            <div id="toolbar_tochuc">
+                
+                <a href="#" class="easyui-linkbutton" iconCls="icon-edit" onclick="capNhattochuc()" > Chỉnh sửa tổ chức </a>
+            
+                <input id="nhanvientochuc" class="easyui-combobox" prompt="Nhân viên" name="nhanvienkhachhang-combobox-customer" 
+                    style="width:250px;"
+                    data-options="
+                        valueField:'maNV',
+                        textField:'tenNV',
+                        url:'../nhanviens/dsnv?tochuc'"
+                >
+
+                <a href="#" class="easyui-linkbutton" iconCls="icon-add" onclick="nhanvientc()">Thêm nhân viên</a>
+                
+                <a href="#" class="easyui-linkbutton" iconCls="icon-reload"  id="taiLai" onclick="$('#dg').datagrid('load',{})"> Tải lại </a>
+
+                <input type="text" placeholder="Thông tin tìm kiếm..." name="timtochuc" style="width: 250px;border-radius:5px;border:1px solid #95b8e7" class="easyui-validatebox tb" onchange="timtochuc()" id="timtochuc"  >
+                <a href="#" class="easyui-linkbutton" iconCls="icon-search"  id="timtochuc" onclick="timtochuc()"> Tìm </a>
+        
+            </div>
+
+
+            <div id="dlg" 
+                class="easyui-dialog" 
+                style="width:900px; padding:10px 20px"
+                closed="true" 
+                buttons="#dlg-buttons"
+                data-options="modal:true"
+            >
+                <form id="fm" method="post" style="margin-left: 60px" >
+                    {% csrf_token %}
+                    <div id="nv">
+                        <table >
+
+                            <tr>
+                                <td><label><b>Tên Tổ Chức :</b></label></td>
+                                <td><input name="tenTC"style="width: 320px;height: 30px;border-radius:5px;border:1px solid #95b8e7" class="easyui-validatebox" required="required" id="tenTC"></td>
+                            </tr>
+
+                            <tr>
+                                <td><label><b>Địa chỉ :</b></label></td>
+                                <td><input name="diachi"style="width: 320px;height: 30px; border-radius:5px;border:1px solid #95b8e7"class="easyui-validatebox" required="required" id="diachi" ></td>   
+                            </tr>
+                    
+                            <tr>
+                                <td><label><b>Khách hàng :</b></label></td>
+                                <td>
+                                <select class="easyui-combogrid" style="width: 320px;height: 30px; border-radius:5px;border:1px solid #95b8e7" name="MaKH" labelWidth="150px"
+                                        id="cbg-kh-tochuc"
+                                        data-options="
+                                            required:true,
+                                            panelWidth: 800,
+                                            idField: 'MaKH',
+                                            textField: 'Ten',
+                                            pagination:'true',
+                                            rownumbers:'true',
+                                            url:'../khachhangs/dskh?khachhangtochuc',
+                                            columns: [[
+                                                {field:'Ten',align:'left',title:'<b>Người quản lý</b>',width:220},
+                                                {field:'Dienthoai',align:'left',title:'<b>Điện thoại</b>',width:150},
+                                                {field:'Dc',align:'left',title:'<b>Địa chỉ</b>',width:460},
+                                            ]],
+                                            onChange:function(val1,val2){
+                                                var g = $('#cbg-kh-tochuc').combogrid('grid');  
+                                                g.datagrid('load',{timkiem:val1.trim()});  
+                                            },"
+                                    >
+                                    </select>
+                            </td>  
+
+                            
+                            <tr>
+                                <td><label><b>Quản lý :</b></label></td>
+                                <td><input name="quanly"style="width: 320px;height: 30px; border-radius:5px;border:1px solid #95b8e7" " class="easyui-validatebox" required="required" id="quanly" ></td>
+                            </tr>
+
+                            <tr>
+                                <td><label><b>Ghi chú :</b></label></td>
+                                <td><input name="ghichu"style="width: 320px;height: 30px; border-radius:5px;border:1px solid #95b8e7" " class="easyui-validatebox" " id="ghichu" ></td>
+                            </tr>
+
+                        </table>
+                    </div>      
+                </form>
+
+                <div id="thongbaotochuc"></div>
+
+            </div>
+
+            <div id="dlg-buttons">
+                <a href="#" class="easyui-linkbutton" iconCls="icon-save" id="luuTC"><b>Lưu</b></a>
+                <a href="#" class="easyui-linkbutton" iconCls="icon-ok"  id="capnhatTC"><b>Cập nhật</b></a>
+                <a href="#" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#dlg').dialog('close');$('#dg').datagrid('reload');"><b>Thoát</b></a>
+            </div>
+
+        </div>
+
+    </center>
+{% endblock %}

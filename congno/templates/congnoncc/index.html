@@ -1,0 +1,131 @@
+{% extends "../trangchu/header.html" %}
+
+{% load static %}
+{% block js %}
+<script type="text/javascript" src="{% static 'js/ajax_congnoncc_mini.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+    <center class="content_center">
+
+        <table id="dg-congnoncc" class="easyui-datagrid" title="Công nợ nhà cung cấp" style="width: 1521px;height: 600px;"
+            showFooter="true"
+            data-options="
+                rownumbers:true,
+                singleSelect:true,
+                url:'taiDuLieu_cn',
+                toolbar:'#tb-congnoncc',
+                pagination:true,"
+        >
+            <thead>
+                <tr>
+                    <th data-options="field:'maPN',width:100, align:'center'" ><b>ID</b></th>
+                    <th data-options="field:'maphieunhap',width:200, align:'center'" ><b>Mã Phiếu Nhập</b></th>
+                    <th data-options="field:'Tennsx',width:210, align:'lefy'"><b>Tên NCC</b></th>
+                    <th data-options="field:'tongPN',width:200, align:'right', formatter:formatCurrency"><b>Tổng Phiếu(VNĐ)</b></th>
+                    <th data-options="field:'tratruoc',width:200, align:'right', formatter:formatCurrency"><b>Trả Trước(VNĐ)</b></th>
+                    <th data-options="field:'tongtratruoc',width:210, align:'right',formatter:formatCurrency"><b>Tổng Thanh(VNĐ)</b></th>
+                    <th id="congnoncc-sncl"data-options="field:'noconlai',width:190, align:'right',groupSeparator:',',min:1000,suffix:'VND',formatter:formatCurrency"><b>Số nợ còn lại(VNĐ)</b></th>
+                    <th data-options="field:'ngaytratieptheo',width:165,align:'center'"><b>Hạn trả</b></th>
+                </tr>
+            </thead>
+
+            <tbody>
+                <tr>
+                    <td>6170</td>
+                    <td>VP2</td>
+                    <td>VP2</td>
+                    <td>100000</td>
+                    <td>0</td>
+                    <td>100000</td>
+                    <td>100000</td>
+                    <td></td>
+                </tr>
+            </tbody>
+
+        </table>
+
+        <!--toolbar of the main datagrid-->
+        <div id="tb-congnoncc" style="padding:2px 5px;">
+        
+            <a  onclick="thanhCN_NCC()"  
+                class="easyui-linkbutton" 
+                data-options="iconCls:'icon-save'"
+                style="width:auto">Thanh CN
+            </a>
+
+            <a  class="easyui-linkbutton"
+                onclick="DeleteCN_NCC()" 
+                data-options="iconCls:'icon-remove'" 
+                style="width:80px">Xóa CN
+            </a>
+
+            <a  class="easyui-linkbutton"
+                onclick="$('#dg-congnoncc').datagrid('load',{m:''})"
+                data-options="iconCls:'icon-reload'" 
+                style="width:75px">Tải lại
+            </a>
+
+            <input  id="search-congnoncc" 
+                class="easyui-textbox" 
+                data-options=" 
+                    prompt:'Tìm theo maNV, tên NSX, ngày...', 
+                    onChange:function(value1, value2){
+                        timkiem_CN_NCC();
+                    }" 
+                style="width:205px;" 
+            >
+
+            <input  class="easyui-combobox" 
+                name="language" style="width:165px;"
+                data-options="  
+                    prompt:'Chọn nhà cung cấp',
+                    url: '../nhapkhos/taidulieunhapkho?nhacungcap',
+                    valueField:'Mansx',
+                    textField:'Tennsx',
+                    onChange:function(value){
+                        $('#dg-congnoncc').datagrid('load',{timkiemcongnoncc:value});
+                    }"
+            >
+
+            Từ: <input id="db-congnoncc-from" class="easyui-datebox" data-options="formatter:myformatter,parser:myparser" style="width:102px">
+            đến: <input id="db-congnoncc-to" class="easyui-datebox" data-options="formatter:myformatter,parser:myparser" style="width:102px">
+
+            <a  class="easyui-linkbutton" iconCls="icon-search" onclick="timkiemtungaydenngay('db-congnoncc-from','db-congnoncc-to','dg-congnoncc')">Tìm kiếm</a>
+
+        </div>
+
+        <!--dialog thanh công nợ-->
+        <div id="dlg-congnoncc-tcn" class="easyui-dialog" style="width:400px;height:fit-content;padding:10px 20px"
+            closed="true" buttons="#bt-congnoncc-tcn"
+        >
+            <div class="ftitle" style="text-align:center">Thông Tin Thanh Công Nợ</div>
+
+            <form id="fm-congnoncc-tcn" method="post">
+                {% csrf_token %}
+                <div class="fitem">
+                    <label>Nợ Còn Lại:</label>
+                    <input  id="txtb-congnoncc-noconlai" class="easyui-numberbox" readonly="true"style="width:260px">
+                </div>
+                <div class="fitem">
+                    <label>Tiền Thanh:</label>
+                    <input  required="true" name="" id="txtb-congnoncc-tienthanh" class="easyui-numberbox" style="width:260px" >
+                </div>
+                <div class="fitem">
+                    <label>Hình Thức:</label>
+                    <input required="true" name="" id="cbb-congnoncc-hinhthuctt" class="easyui-combo" style="width:260px" data-options="editable:false,">
+                </div>
+                <div class="fitem">
+                    <label>Số TK:</label>
+                    <input name="" id="txtb-congnoncc-sotk" class="easyui-textbox" style="width:260px">
+                </div>
+            </form>
+        </div>  
+
+        <div id="bt-congnoncc-tcn">
+            <a class="easyui-linkbutton" id="thanhtoan" onclick="thanhToanCN_NCC()" iconCls="icon-ok">Thanh Toán</a>
+            <a class="easyui-linkbutton" onclick="javascript:$('#dlg-congnoncc-tcn').dialog('close')" iconCls="icon-cancel">Hủy</a>
+        </div>
+
+    </center>
+{% endblock %}
