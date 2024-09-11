@@ -39,10 +39,10 @@ def xoaKHModel(maKH):
             return True
         else:
             return False
-def themKHModel(tenKH,Diachi,sDT,fax,email,nkh,mt,ngaySinh,gioiTinh,tinh,huyen,dcrieng,ngt,npt,mqhkh,nguonkh,maTC):
+def themKHModel(tenKH,Diachi,sDT,fax,email,nkh,mt,ngaySinh,gioiTinh,tinh,huyen,dcrieng,ngt,npt,mqhkh,nguonkh,maTC,tentinh,tenhuyen):
     if kiemTraTonTaiMaKH(sDT,maTC):
         with connection.cursor() as cursor:
-            cursor.execute("INSERT INTO khachhangs (MaKH,  Ten ,  Dc ,  Dienthoai ,  Fax ,  Email ,  Mathue ,  Manhom ,  Mota ,  website ,  Nganhhoc ,  Namsinh ,  Gioitinh ,  Maquocgia ,  Matinh ,  Mahuyen ,  Sothich ,  Chucvu ,  Diachi_nharieng ,  Nguoigioithieu ,  Manguoi_phutrach ,  HuongCK ,  maMQHe ,  maNguonKH ,  Matkhau ,  anh , maTC , ngaytao, makichhoat, kichhoat ) VALUES ('',%s,%s,%s,%s,%s,'',%s,%s,'','',%s,%s,'1',%s,%s,'','',%s,%s,%s,'',%s,%s,md5(%s),'',%s,NOW(),'','')", [tenKH,Diachi,sDT,fax,email,nkh,mt,ngaySinh,gioiTinh,tinh,huyen,dcrieng,ngt,npt,mqhkh,nguonkh,sDT,maTC])
+            cursor.execute("INSERT INTO khachhangs (MaKH,  Ten ,  Dc ,  Dienthoai ,  Fax ,  Email ,  Mathue ,  Manhom ,  Mota ,  website ,  Nganhhoc ,  Namsinh ,  Gioitinh ,  Maquocgia ,  Matinh ,  Mahuyen ,  Sothich ,  Chucvu ,  Diachi_nharieng ,  Nguoigioithieu ,  Manguoi_phutrach ,  HuongCK ,  maMQHe ,  maNguonKH ,  Matkhau ,  anh , maTC , ngaytao, makichhoat, kichhoat,Tentinh, Tenhuyen ) VALUES ('',%s,%s,%s,%s,%s,'',%s,%s,'','',%s,%s,'1',%s,%s,'','',%s,%s,%s,'',%s,%s,md5(%s),'',%s,NOW(),'','',%s,%s)", [tenKH,Diachi,sDT,fax,email,nkh,mt,ngaySinh,gioiTinh,tinh,huyen,dcrieng,ngt,npt,mqhkh,nguonkh,sDT,maTC,tentinh,tenhuyen])
             cursor.execute("SELECT '',%s,MaKH,NOW() from khachhangs where khachhangs.Dienthoai =%s", [npt,sDT])
             result = cursor.fetchall()
             for i in result:
@@ -57,10 +57,10 @@ def themKHModel(tenKH,Diachi,sDT,fax,email,nkh,mt,ngaySinh,gioiTinh,tinh,huyen,d
     else:
         return False
 
-def chinhSuaKHModel(MaKH,tenKH,Diachi,sDT,fax,email,nkh,mt,ngaySinh,gioiTinh,tinh,huyen,dcrieng,ngt,npt,mqhkh,nguonkh,maTC):
+def chinhSuaKHModel(MaKH,tenKH,Diachi,sDT,fax,email,nkh,mt,ngaySinh,gioiTinh,tinh,huyen,dcrieng,ngt,npt,mqhkh,nguonkh,maTC,tentinh,tenhuyen):
     if kiemTraSDT(sDT,MaKH):
         with connection.cursor() as cursor:
-            cursor.execute("UPDATE khachhangs SET MaKH = %s, Ten=%s,Dc=%s,Dienthoai=%s,Fax=%s,Email=%s,Manhom=%s,Mota=%s,Namsinh=%s,Gioitinh=%s,Matinh=%s,Mahuyen=%s,Diachi_nharieng=%s,Nguoigioithieu=%s,Manguoi_phutrach=%s,maMQHe=%s,maNguonKH=%s WHERE MaKH =%s", [MaKH,tenKH,Diachi,sDT,fax,email,nkh,mt,ngaySinh,gioiTinh,tinh,huyen,dcrieng,ngt,npt,mqhkh,nguonkh,MaKH])
+            cursor.execute("UPDATE khachhangs SET MaKH = %s, Ten=%s,Dc=%s,Dienthoai=%s,Fax=%s,Email=%s,Manhom=%s,Mota=%s,Namsinh=%s,Gioitinh=%s,Matinh=%s,Mahuyen=%s,Diachi_nharieng=%s,Nguoigioithieu=%s,Manguoi_phutrach=%s,maMQHe=%s,maNguonKH=%s, Tentinh = %s, Tenhuyen = %s WHERE MaKH =%s", [MaKH,tenKH,Diachi,sDT,fax,email,nkh,mt,ngaySinh,gioiTinh,tinh,huyen,dcrieng,ngt,npt,mqhkh,nguonkh,tentinh,tenhuyen,MaKH])
             if cursor.rowcount > 0:
                 return True
             else:

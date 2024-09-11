@@ -13,8 +13,13 @@ urlpatterns = [
     path("moiqh/", views.moiqh, name = "moiqh"),
     path("themKH/", views.themKH, name='them_kh'),
     path("dsnhomKH/", views.dsnhomKH, name='dsnhomKH'),
-    path("taidulieunvpt/", views.taidulieunvpt, name='taidulieunvpt'),
     path("taiDuLieuSN/", views.taiDuLieuSN, name='taiDuLieuSN'),
     path("khachhangpckh/", views.khachhangpckh, name='khachhangpckh'),
     path("taiduphancapkh/", views.taiduphancapkh, name='taiduphancapkh'),
+    path("taiDuLieuNV/", views.taiDuLieuNV, name='taiDuLieuNV'),
+    path("themnvpt/", views.themnvpt, name='themnvpt'),
+    path("xoanvpt/", views.xoanvpt, name='xoanvpt'),
+    path('themphancapkh/', views.themphancapkh, name = 'themphancapkh'),
+    path('baosinhnhat/', views.baosinhnhat, name='baosinhnhat'),
+    path('export_dsKH/', views.export_dsKH, name='export_dsKH')
 ]

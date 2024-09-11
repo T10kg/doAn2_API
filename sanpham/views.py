@@ -30,4 +30,6 @@ def nhanhang(request):
             "user_name": request.session.get("member_id")
         }
         return render(request, "sanpham/nhanhang.html", context)
+
+
    

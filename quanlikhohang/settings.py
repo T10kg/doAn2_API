@@ -101,7 +101,7 @@ WSGI_APPLICATION = 'quanlikhohang.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'doan2',
+        'NAME': 'dulieu',
         'USER': 'root',
         'PASSWORD': '',
         'HOST': 'localhost',

@@ -50,36 +50,34 @@ function send_and_set_data_by_id(b, c, d) {
 }
 ;function canhbao(thongbao) {
     if (thongbao == "Trùng số QR hoặc SL tồn < SL xuất") {
-        print('1')
         thongbaocanhbao(thongbao)
     } else if (thongbao == "Mã QR không tồn tại trong nhập kho, vui lòng kiểm tra lại") {
-        print('2')
+
         thongbaocanhbao(thongbao)
     } else if (thongbao == "Mã Vạch không tồn tại trong nhập kho, vui lòng kiểm tra lại") {
-        print('3')
+
         thongbaocanhbao(thongbao)
     } else if (thongbao == "Số lượng vượt tồn kho, vui lòng kiểm tra lại") {
-        print('4')
+
         thongbaocanhbao(thongbao)
     } else if (thongbao == "Có lỗi xảy ra vui lòng kiểm tra lại") {
-        print('5')
+
         thongbaocanhbao(thongbao)
     } else {
-        print('6')
         $.messager.show({
             title: 'Thông Báo',
             msg: thongbao
         })
     }
 }
-function sendajax3(url, bien, datagrid,thongbao) {
+function sendajax3(url, bien, datagrid) {
     $.ajax({
         url: url,
         type: 'POST',
         contentType: 'application/json',
         data: JSON.stringify({ thamso: bien }), // Ensure thamso does not have syntax errors
-        success: function(data) {
-            if (data) {
+        success: function(thongbao) {
+            if (thongbao) {
                 canhbao(thongbao); // Assuming canhbao is a function that handles the alert or warning
                 $("#" + datagrid).datagrid("reload"); // Reload the datagrid after the AJAX call is successful
             }
@@ -89,7 +87,7 @@ function sendajax3(url, bien, datagrid,thongbao) {
 
 
 
-function sendajax(url, bien, datagrid, func) {
+function sendajax4(url, bien, datagrid, func) {
     $.post(url, {
         thamso: bien
     }, function(data) {

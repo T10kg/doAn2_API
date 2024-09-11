@@ -6,10 +6,11 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
 from trangchu.views import check_session
-from api.views import api_themKH,api_dsnhomKH,api_taidulieunvpt,api_taiDuLieuSN,api_khachhangpckh, api_taiduphancapkh
+from api.views import api_themKH,api_dsnhomKH,api_taiDuLieuSN,api_khachhangpckh, api_taiduphancapkh
 from django.http import JsonResponse
 import json, requests
 from django.db import connection
+from . import models
 # Create your views here.
 @check_session
 def index(request):
@@ -1318,10 +1319,6 @@ def dsnhomKH(request):
     data = api_dsnhomKH(request)
     return JsonResponse(data, safe=False)
 
-@csrf_exempt
-def taidulieunvpt(request):
-    data = api_taidulieunvpt(request)
-    return JsonResponse(data, safe=False)
 
 @csrf_exempt
 def khachhangpckh(request):
@@ -1336,7 +1333,64 @@ def taiDuLieuSN(request):
 def taiduphancapkh(request):
     data = api_taiduphancapkh(request)
     return JsonResponse(data, safe=False)
+@csrf_exempt
+def taiDuLieuNV(request):
+    makh = request.POST.get('makh', None)
+    data_list = []
+    with connection.cursor() as cursor:
+        cursor.execute(
+            "SELECT manv, ngayphutrach,id FROM nvphutrachkhs WHERE makh = %s",
+            [makh]
+        )
+        thucthi = cursor.fetchall()
+        for row in thucthi:
+            cursor.execute(
+                "SELECT tenNV, Sdt, Ngaysinh, gioiTinh FROM nhanviens WHERE maNV = %s",
+                [row[0]]
+            )
+            thucthi1 = cursor.fetchall()
+            for row1 in thucthi1:
+                data = {
+                    "tenNV": row1[0],
+                    "Sdt": row1[1],
+                    "ngaySinh": row1[2],
+                    "gioiTinh": row1[3],
+                    "ngayphutrach": row[1],
+                    "id": row[2]
+                }
+                data_list.append(data)
 
+        return JsonResponse(data_list, safe=False)
+
+@csrf_exempt
+def themnvpt(request):
+    if request.method == "POST":
+        thongbao = ""
+        tmp = json.loads(request.body)
+        data = tmp.get('thamso')
+        makh = data['makh']
+        manv = data['manv']
+        if models.themnvptmodel(manv,makh):
+            thongbao = "Thêm nhân viên phụ trách thành công"
+        else:
+            thongbao = "Có lỗi(trùng nhân viên) xảy ra vui lòng kiểm tra lại"
+
+        return JsonResponse(thongbao, safe=False)
+
+
+@csrf_exempt
+def xoanvpt(request):
+    if request.method == "POST":
+        thongbao = ""
+        tmp = json.loads(request.body)
+        data = tmp.get('thamso')
+        id = data['id']
+        if models.xoanvptmodel(id):
+            thongbao = "Xóa nhân viên phụ trách thành công"
+        else:
+            thongbao = "Có lỗi xảy ra vui lòng kiểm tra lại"
+
+        return JsonResponse(thongbao, safe=False)
 
 @csrf_exempt
 def themKH(request):
@@ -1353,3 +1407,32 @@ def themKH(request):
     #         return Response({'ketqua': True}, status=status.HTTP_200_OK)
     #     else:
     #         return Response({'ketqua': False}, status=status.HTTP_200_OK)
+
+@csrf_exempt
+def themphancapkh(request):
+
+    return JsonResponse(data, safe=False)
+
+@csrf_exempt
+def baosinhnhat(request):
+    data_list = []
+    with connection.cursor() as cursor:
+        cursor.execute(
+            "SELECT MaKH, Ten, Dc, Dienthoai, Gioitinh, Namsinh FROM khachhangs WHERE date_format(Namsinh, '%m-%d') < date_format(DATE_ADD(now(), INTERVAL 7 DAY), '%m-%d') AND date_format(Namsinh, '%m-%d') >= date_format(now(), '%m-%d')"
+        )
+        thucthi = cursor.fetchall()
+        for row in thucthi:
+            data = {
+                "Ten": row[1],
+                "Namsinh": row[5],
+                "Gioitinh": row[4],
+                "Dienthoai": row[3],
+                "Dc": row[2]
+            }
+            data_list.append(data)
+
+    return JsonResponse(data_list, safe=False)
+
+def export_dsKH(request):
+    hello = None
+    return JsonResponse(hello, safe=False)

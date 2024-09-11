@@ -16,68 +16,118 @@ class dulieuNVPT(APIView):
     def get(self, request, *args, **kwargs):
         return True
 
-class dulieuKH(APIView):  # Đổi tên lớp để tránh xung đột với APIView
-    def get(self, request, *args, **kwargs):
-        with connection.cursor() as cursor:
-            api_url_tinh = 'http://127.0.0.1:8000/khachhang/danhsachtinh/'
-            response = requests.get(api_url_tinh)
-            data1 = response.json()
+def hienThiDuLieuKH(thamso, loaitimkiem):
+    with connection.cursor() as cursor:
+        api_url_tinh = 'http://127.0.0.1:8000/khachhang/danhsachtinh/'
+        response = requests.get(api_url_tinh)
+        data1 = response.json()
 
-            api_url_huyen = 'http://127.0.0.1:8000/khachhang/dsh/'
-            response = requests.get(api_url_huyen)
-            data2 = response.json()
+        api_url_huyen = 'http://127.0.0.1:8000/khachhang/dsh/'
+        response = requests.get(api_url_huyen)
+        data2 = response.json()
 
-            api_url_dsnhomkh = 'http://127.0.0.1:8000/khachhang/nhomkh/'
-            response = requests.get(api_url_dsnhomkh)
-            data3 = response.json()
+        api_url_dsnhomkh = 'http://127.0.0.1:8000/khachhang/nhomkh/'
+        response = requests.get(api_url_dsnhomkh)
+        data3 = response.json()
 
-            api_url_nguoipt = 'http://127.0.0.1:8000/khachhang/nguoipt/'
-            response = requests.get(api_url_nguoipt)
-            data4 = response.json()
-
+        api_url_nguoipt = 'http://127.0.0.1:8000/khachhang/nguoipt/'
+        response = requests.get(api_url_nguoipt)
+        data4 = response.json()
+        data_list = []
+        if thamso == '':
             cursor.execute(
                 "SELECT MaKH, Ten, Diachi_nharieng, Dienthoai,Dc,Mahuyen,Matinh,Manhom,Manguoi_phutrach,Mota,ngaytao,Email, Namsinh FROM khachhangs")
-            thucthi = cursor.fetchall()
-            data_list = []
-
-            for row in thucthi:
+        else:
+            if loaitimkiem == 'listNhanVien':
+                sql = "SELECT MaKH, Ten, Diachi_nharieng, Dienthoai,Dc,Mahuyen,Matinh,Manhom,Manguoi_phutrach,Mota,ngaytao,Email, Namsinh FROM khachhangs"
+                if thamso["manv"] != "" or thamso["manhom"] != "":
+                    if thamso["manv"] == "":
+                        sql = sql + " WHERE Manhom = %s"
+                        cursor.execute(sql, [thamso["manhom"]])
+                        print(1)
+                    elif thamso["manhom"] == "":
+                        sql = sql + " WHERE Manguoi_phutrach = %s"
+                        cursor.execute(sql, [thamso["manv"]])
+                        print(2)
+                    else:
+                        sql = sql + " WHERE Manhom = %s AND Manguoi_phutrach = %s"
+                        cursor.execute(sql, [thamso["manhom"], thamso["manv"]])
+                        print(3)
+                else:
+                    cursor.execute(sql)
+                    print(4)
+            else:
+                cursor.execute(
+                    "SELECT MaKH, Ten, Diachi_nharieng, Dienthoai,Dc,Tenhuyen,Tentinh,Manhom,Manguoi_phutrach,Mota,ngaytao,Email, Namsinh FROM khachhangs WHERE (MaKH LIKE %s  OR  Ten LIKE %s  OR  Diachi_nharieng LIKE %s  OR   Dienthoai LIKE %s  OR Dc LIKE %s  OR Tenhuyen LIKE %s  OR Tentinh LIKE %s  OR Manhom LIKE %s  OR Manguoi_phutrach LIKE %s  OR Mota LIKE %s  OR ngaytao LIKE %s  OR Email LIKE %s  OR  Namsinh LIKE %s)",
+                    [f'%{thamso}%', f'%{thamso}%', f'%{thamso}%', f'%{thamso}%', f'%{thamso}%', f'%{thamso}%',
+                     f'%{thamso}%', f'%{thamso}%', f'%{thamso}%', f'%{thamso}%', f'%{thamso}%', f'%{thamso}%',
+                     f'%{thamso}%']
+                )
+                print(5)
+        thucthi = cursor.fetchall()
+        for row in thucthi:
+            tentinh = ''
+            tenhuyen = ''
+            if row[5].isdigit() and row[6].isdigit():
                 for giatri in data1:
-                    if giatri['provinceid'] == row[6]:
+                    if str(giatri['provinceid']) == str(row[6]):
                         tentinh = giatri['name']
                         break
 
                 for giatri in data2:
-                    if giatri['districtid'] == row[5]:
+                    if str(giatri['districtid']) == str(row[5]):
                         tenhuyen = giatri['name']
                         break
+            else:
+                tentinh = row[6]
+                tenhuyen = row[5]
+            nhomkh = data3[int(row[7]) - 1]['Tennhomkh']
+            for giatri in data4:
+                if giatri['maNV'] == row[8]:
+                    nguoiphutrach = giatri['tenNV']
+                    break
+            data = {
+                'MaKH': row[0],
+                'Ten': row[1],
+                'Diachi_nharieng': row[2],
+                'Dienthoai': row[3],
+                'Dc': row[4],
+                'tenhuyen': tenhuyen,
+                'tentinh': tentinh,
+                'Tennhomkh': nhomkh,
+                'tennhanvien': nguoiphutrach,
+                'maNV': nguoiphutrach,
+                'Mota': row[9],
+                'ngaytao': row[10],
+                'Email': row[11],
+                'Matinh': tentinh,
+                'Mahuyen': tenhuyen,
+                'Manhom': nhomkh,
+                'ngaysinh': row[12]
+            }
+            data_list.append(data)
+        return data_list
 
-                nhomkh = data3[int(row[7]) - 1]['Tennhomkh']
-                for giatri in data4:
-                    if giatri['maNV'] == row[8]:
-                        nguoiphutrach = giatri['tenNV']
-                        break
-                data = {
-                    'MaKH': row[0],
-                    'Ten': row[1],
-                    'Diachi_nharieng': row[2],
-                    'Dienthoai': row[3],
-                    'Dc': row[4],
-                    'tenhuyen': tenhuyen,
-                    'tentinh': tentinh,
-                    'Tennhomkh': nhomkh,
-                    'tennhanvien': nguoiphutrach,
-                    'maNV': nguoiphutrach,
-                    'Mota': row[9],
-                    'ngaytao': row[10],
-                    'Email': row[11],
-                    'Matinh': tentinh,
-                    'Mahuyen':tenhuyen,
-                    'Manhom': nhomkh,
-                    'ngaysinh':row[12]
-                }
-                data_list.append(data)
-            return Response(data_list, status=status.HTTP_200_OK)
-
+class dulieuKH(APIView):  # Đổi tên lớp để tránh xung đột với APIView
+    def get(self, request, *args, **kwargs):
+        data_list = hienThiDuLieuKH('','')
+        return Response(data_list, status=status.HTTP_200_OK)
+    def post(self, request, *args, **kwargs):
+        timkiemtheonv_capbac = request.POST.get('timkiemtheonv_capbac')
+        dulieu = request.POST.get('thamso')
+        timKiemKH = request.POST.get('timKiemKH')
+        thamso = ''
+        loaitimkiem = ''
+        if timKiemKH:
+            thamso = timKiemKH
+            loaitimkiem = 'thanhTimKiem'
+        elif timkiemtheonv_capbac:
+            thamso = json.loads(dulieu)
+            loaitimkiem = 'listNhanVien'
+        else:
+            thamso = ''
+        data_list = hienThiDuLieuKH(thamso, loaitimkiem)
+        return Response(data_list, status=status.HTTP_200_OK)
 def taofile(name, noidung):
     # Mở file ở chế độ ghi và đọc (write + read)
     with open("file/"+name+".txt", 'w') as file:
@@ -161,12 +211,34 @@ def api_themKH(request):
         mqhkh = data['mqhkh'];
         ngayTaoTK = date.strftime("Y-m-d:H");
         infonv = request.session.get('infonv', [])
+
+        api_url_tinh = 'http://127.0.0.1:8000/khachhang/danhsachtinh/'
+        response = requests.get(api_url_tinh)
+        data1 = response.json()
+
+        api_url_huyen = 'http://127.0.0.1:8000/khachhang/dsh/'
+        response = requests.get(api_url_huyen)
+        data2 = response.json()
+
+
+        tentinh = ''
+        for giatri1 in data1:
+            if giatri1['provinceid'] == tinh:
+                tentinh = giatri1['name']
+                break
+
+        tenhuyen = ''
+        for giatri2 in data2:
+            if str(giatri2['districtid']) == str(huyen):
+                tenhuyen = giatri2['name']
+                break
+        print(tenhuyen)
         if infonv:
             maTC = infonv[0].get('nhanviens', {}).get('maTC', None)
         if ngaySinh >= ngayTaoTK:
            thongbao = "Ngày sinh phải nhỏ hơn ngày hiện tại";
         else:
-            if models.themKHModel(tenKH,Diachi,sDT,fax,email,nkh,mt,ngaySinh,gioiTinh,tinh,huyen,dcrieng,ngt,npt,mqhkh,nguonkh,maTC):
+            if models.themKHModel(tenKH,Diachi,sDT,fax,email,nkh,mt,ngaySinh,gioiTinh,tinh,huyen,dcrieng,ngt,npt,mqhkh,nguonkh,maTC,tentinh,tenhuyen):
                 thongbao = "Thêm Thành Công Khách Hàng " + str(tenKH);
             else:
                 thongbao = "Không Thành Công! Khách Hàng Đã Tồn Tại";
@@ -198,14 +270,17 @@ def api_capnhatKH(request):
         huyen = data['huyen']
         nkh = data['nkh']
         npt = data['npt']
-
+        print(data['tinh'])
+        print(data['huyen'])
+        tentinh = ''
+        tenhuyen = ''
         api_url_tinh = 'http://127.0.0.1:8000/khachhang/danhsachtinh/'
         response = requests.get(api_url_tinh)
         data1 = response.json()
 
         for row in data1:
-            if row['name'] == data['tinh']:
-                tinh = row['provinceid']
+            if str(row['provinceid']) == str(data['tinh']):
+                tentinh = row['name']
                 break
 
         api_url_huyen = 'http://127.0.0.1:8000/khachhang/dsh/'
@@ -213,8 +288,8 @@ def api_capnhatKH(request):
         data2 = response.json()
 
         for row in data2:
-            if row['name'] == data['huyen']:
-                huyen = row['districtid']
+            if str(row['districtid']) == str(data['huyen']):
+                tenhuyen = row['name']
                 break
 
         api_url_dsnhomkh = 'http://127.0.0.1:8000/khachhang/nhomkh/'
@@ -250,6 +325,7 @@ def api_capnhatKH(request):
         nguonkh = data['nguonkh'];
         mqhkh = data['mqhkh'];
         ngayTaoTK = date.strftime("Y-m-d");
+
         infonv = request.session.get('infonv', [])
         if infonv:
             maTC = infonv[0].get('nhanviens', {}).get('maTC', None)
@@ -257,13 +333,13 @@ def api_capnhatKH(request):
            message = "Ngày sinh phải nhỏ hơn ngày hiện tại";
         else:
             if models.kiemTraSDT(sDT, MaKH):
-                if models.chinhSuaKHModel(MaKH,tenKH,Diachi,sDT,fax,email,nkh,mt,ngaySinh,gioiTinh,tinh,huyen,dcrieng,ngt,npt,mqhkh,nguonkh,maTC):
+                if models.chinhSuaKHModel(MaKH,tenKH,Diachi,sDT,fax,email,nkh,mt,ngaySinh,gioiTinh,tinh,huyen,dcrieng,ngt,npt,mqhkh,nguonkh,maTC,tentinh,tenhuyen):
                     message = "Cập Nhật Thành Công Khách Hàng " + str(tenKH);
                 else:
                     message = "Cập Nhật Không Thành Công!";
             else:
                 if models.kiemTraTonTaiMaKH(sDT, maTC):
-                    if models.chinhSuaKHModel(MaKH,tenKH,Diachi,sDT,fax,email,nkh,mt,ngaySinh,gioiTinh,tinh,huyen,dcrieng,ngt,npt,mqhkh,nguonkh,maTC):
+                    if models.chinhSuaKHModel(MaKH,tenKH,Diachi,sDT,fax,email,nkh,mt,ngaySinh,gioiTinh,tinh,huyen,dcrieng,ngt,npt,mqhkh,nguonkh,maTC,tentinh,tenhuyen):
                         message = "Cập Nhật Thành Công Khách Hàng " + str(tenKH);
                     else:
                         message = "Cập Nhật Không Thành Công!";

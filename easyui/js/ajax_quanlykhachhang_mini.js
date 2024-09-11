@@ -201,7 +201,7 @@ function themKhachhang() {
         console.log(bien);
         if (!$(this).hasClass('clicked')) {
             $("#luuKH").addClass('clicked')
-            sendajax3("../api/themKH/", bien, "dg",'Thêm khách hàng thành công')
+            sendajax3("../api/themKH/", bien, "dg")
             $('#dlg').dialog('close')
         }
     })
@@ -380,30 +380,60 @@ function xoaKH() {
     }
 }
 function timKH() {
-    $timKiemNhanVien = $('#tim').val();
-    if ($timKiemNhanVien != "") {
-        $('#dg').datagrid('load', {
-            timKiemKH: $timKiemNhanVien
-        })
+    timKiemNhanVien = $('#tim').val();
+    if (timKiemNhanVien != "") {
+        $('#dg').datagrid(
+            {
+                url: 'http://127.0.0.1:8000/api/danhsachKH/',  // URL để gửi yêu cầu AJAX
+                method: 'post',
+                queryParams: {
+                    // Thêm dữ liệu cần thiết để gửi cùng với yêu cầu POST
+                    timKiemKH: timKiemNhanVien
+                },
+                onLoadSuccess: function (data) {
+                    console.log('Data loaded successfully:', data);
+                },
+                onLoadError: function () {
+                    console.log('Error loading data');
+                }
+            }
+        ).datagrid('clientPaging');
     } else {
-        $manv = $("#nhanvienkd_kh").combobox("getValue")
-        $manhom = $("#capbac_kh").combobox("getValue")
-        $bien = {
-            manv: $manv,
-            manhom: $manhom
+        manv = $("#nhanvienkd_kh").combobox("getValue")
+        manhom = $("#capbac_kh").combobox("getValue")
+        console.log(manv)
+        console.log(manhom)
+        bien = {
+            manv: manv,
+            manhom: manhom
         }
-        $('#dg').datagrid('load', {
-            timkiemtheonv_capbac: '1',
-            thamso: $bien
-        })
+        console.log(bien)
+        $('#dg').datagrid(
+            {
+                url: 'http://127.0.0.1:8000/api/danhsachKH/',  // URL để gửi yêu cầu AJAX
+                method: 'post',
+                queryParams: {
+                    // Thêm dữ liệu cần thiết để gửi cùng với yêu cầu POST
+                    timkiemtheonv_capbac: '1',
+                    // không thể truyền trực tiếp biến vì gây khó hiểu k nhận
+                    thamso:  JSON.stringify(bien)
+                },
+                onLoadSuccess: function (data) {
+                    console.log('Data loaded successfully:', data);
+                },
+                onLoadError: function () {
+                    console.log('Error loading data');
+                }
+            }
+        ).datagrid('clientPaging');
     }
 }
 function xuatdanhsachkhtheotimkiem() {
-    $timKiemNhanVien = $('#tim').val();
-    $manv = $("#nhanvienkd_kh").combobox("getValue")
-    $manhom = $("#capbac_kh").combobox("getValue")
-    $bien = [$timKiemNhanVien, $manv, $manhom]
-    xuatfile("", "", "export_dsKH", $bien)
+    timKiemNhanVien = $('#tim').val();
+    manv = $("#nhanvienkd_kh").combobox("getValue")
+    manhom = $("#capbac_kh").combobox("getValue")
+    bien = [timKiemNhanVien, manv, manhom]
+    xuatfile("", "", "../khachhang/export_dsKH/", bien)
 }
 function taiLaiLH() {
     $('#dg').datagrid('load', {})
@@ -532,11 +562,6 @@ function nhanvienpt() {
         $('#dlg_nhanvienphutrach').dialog('open');
         $("#nhanvienpt_dg").datagrid("load", {
             makh: makh,
-            Sdt: 12345,
-            tenNV: 'Hello',
-            ngaySinh: '2024-08-07',
-            gioiTinh: 'Nam',
-            ngayphutrach: '2024-08-07',
         })
     } else {
         thongbao("Vui lòng chọn khách hàng")
@@ -545,19 +570,19 @@ function nhanvienpt() {
 function themnvpt() {
     var row = $("#dg").datagrid('getSelected')
     if (row) {
-        $makh = row.MaKH;
-        $manv = $("#nhanvienkdnvpt").combobox("getValue");
-        if ($manv == "") {
+        makh = row.MaKH;
+        manv = $("#nhanvienkdnvpt").combobox("getValue");
+        if (manv == "") {
             thongbao("Vui lòng chọn nhân viên kinh doanh")
             return !1
         }
         var bien = {
-            makh: $makh,
-            manv: $manv
+            makh: makh,
+            manv: manv
         }
-        sendajax("themnvpt", bien, "nhanvienpt_dg");
+        sendajax3("../khachhang/themnvpt/", bien, "nhanvienpt_dg");
         $("#nhanvienpt_dg").datagrid("load", {
-            makh: $makh
+            makh: makh
         })
     } else {
         thongbao("Vui lòng chọn khách hàng");
@@ -567,11 +592,11 @@ function themnvpt() {
 function xoanvpt() {
     var row = $("#nhanvienpt_dg").datagrid('getSelected')
     if (row) {
-        $id = row.id;
+        id = row.id;
         var bien = {
-            id: $id
+            id: id
         }
-        xoadulieuajax("xoanvpt", bien, "nhanvienpt_dg", "Bạn có muốn thực hiện thao tác này không");
+        xoadulieuajax("../khachhang/xoanvpt/", bien, "nhanvienpt_dg", "Bạn có muốn thực hiện thao tác này không");
         $("#nhanvienpt_dg").datagrid("load", {
             makh: $makh
         })
@@ -632,13 +657,13 @@ function themphancapkh() {
                 makh: $makh,
                 makhpt: $makhpt
             }
-            sendajax("../phancapkhs/themphancapkh", bien, "phancapkh_dg")
+            sendajax3("../khachhang/themphancapkh/", bien, "phancapkh_dg")
         } else if ($tinhtrang == !1) {
             var bien = {
                 makh: $makhpt,
                 makhpt: $makh
             }
-            sendajax("../phancapkhs/themphancapkh", bien, "phancapkh_dg")
+            sendajax3("../khachhang/themphancapkh/", bien, "phancapkh_dg")
         } else {
             return !0
         }
