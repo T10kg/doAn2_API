@@ -1,0 +1,159 @@
+{% extends "../trangchu/header.html" %}
+
+{% load static %}
+{% block js %}
+<script type="text/javascript" src="{% static 'js/ajax_passdonhangsp_mini.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+    <center class="content_center">
+
+        <table id="qlnhandhpass-dg" class="easyui-datagrid" title="Quản lý nhận đơn hàng pass" style="width: 1521px;height: 600px;"
+            pageSize="20"
+            data-options="
+                rownumbers:true, 
+                singleSelect:true, 
+                url:'../passdonhangsps/taidulieupassdonhang?qlnhandhpass', 
+                toolbar:'#qlppassdh-dg', pagination:true,"
+        >
+            <thead>
+                <tr>
+                    <th data-options="field:'id',width:50, align:'center'" ><b>id</b></th>
+                    <th data-options="field:'mapp',width:140, align:'center'" ><b>Mã phiếu pass</b></th>
+                    <th data-options="field:'mapx',width:140"><b>Mã PX</b></th>
+                    <th data-options="field:'tenkh',width:240"><b>Tên khách hàng</b></th>
+                    <th data-options="field:'nvkinhdoanh',width:200" ><b>NV kinh doanh</b></th>
+                    <th data-options="field:'tongphieu',width:150, align:'right',formatter:formatCurrency"><b>Tổng phiếu(VNĐ)</b></th>
+                    <th data-options="field:'ngaypass',width:200,align:'center'"><b>Ngày nhận phiếu</b></th>
+
+                    <th data-options="field:'tinhtrang',width:170,align:'center',
+                        formatter:function(value,row,index){
+                            if(value=='0'){
+                                return 'Chưa xuất phiếu'
+                            } else{ 
+                                return 'Đã xuất phiếu'
+                            }
+                        }">
+                        <b>Tình trạng</b>
+                    </th>
+
+                    <th data-options="field:'ghichu',width:300,align:'left'"><b>Ghi chú</b></th>
+                </tr>
+            </thead>
+
+            <tbody>
+                <tr>
+                    <td>92727</td>
+                    <td>92755</td>
+                    <td>A9272</td>
+                    <td>Văn A</td>
+                    <td>Thị B</td>
+                    <td>100000</td>
+                    <td>2020-05-18</td>
+                    <td>0</td>
+                    <td></td>
+                </tr>
+            </tbody>
+
+        </table>
+
+        <div id="qlppassdh-dg" style="padding:2px 5px;">
+            <!-- Tạo phiếu xuất -->
+            <a class="easyui-linkbutton" iconCls="icon-list" onclick="nhapqr()">Nhập mã QR</a> 
+            <a onclick="nhandonhangpass()" class="easyui-linkbutton" data-options="iconCls:'icon-add'" style="width:auto">Tạo phiếu xuất đơn hàng</a>
+
+            Từ: <input id="db-QLPASSDH-from" class="easyui-datebox" data-options="formatter:myformatter,parser:myparser,panelHeight:300" style="width:160px;">
+            đến: <input id="db-QLPASSDH-to" class="easyui-datebox" data-options="formatter:myformatter,parser:myparser,panelHeight:300" style="width:160px;">
+
+            <a class="easyui-linkbutton" data-options="iconCls:'icon-search'" style="width:auto" 
+                onclick="timkiemtungaydenngay('db-QLPASSDH-from','db-QLPASSDH-to','qlnhandhpass-dg')">
+                Tìm kiếm
+            </a>
+        
+            <input class="easyui-textbox" id="timkiemppassdh" data-options="prompt:'Tìm mã PP',
+                onChange:function(val1,val2){
+                    $('#qlnhandhpass-dg').datagrid('load',{timpassdh:val1});
+                }" 
+                style="width:300px;"
+            >
+
+            <a onclick="$('#qlnhandhpass-dg').datagrid('load',{daxuat:''})" class="easyui-linkbutton" data-options="iconCls:'icon-add'" style="width:auto">DS phiếu đã xuất</a>
+            <a onclick="$('#qlnhandhpass-dg').datagrid('load',{})" class="easyui-linkbutton" data-options="iconCls:'icon-reload'" style="width:auto">Tải lại</a>
+        </div>
+
+        <!--dialog nhập mã qr-->
+        <div id="dg-nhapqr" class="easyui-dialog" title="Nhập mã qr" data-options="" closed="true" style="width:90%;height: 90%;padding:5px;">
+            <br>
+            <table id="dlg-nhapqr" class="easyui-datagrid" title="Danh sách sản phẩm cần nhập mã qr"
+                style=" width:99%;" 
+                fitColumns="true" showFooter="true" pagination="true"
+                rownumbers="true"  
+                showFooter="true" 
+                data-options=" 
+                    fitColumns:true,
+                    toolbar:'#toolbar_nhapqr',
+                    singleSelect: true"
+                pagesize="20"
+            >
+                <thead>
+                    <tr>
+                        <th data-options="field:'tensp',width:170"><b>Tên sản phẩm</b></th>
+                        <th data-options="field:'soluongpass',width:80"><b>Số lượng</b></th>
+                        <th data-options="field:'giasp',width:70,align:'right'"><b>Đơn giá</b></th>
+                        <th data-options="field:'chietkhau',width:60"><b>Chiếc khấu(%)</b></th>
+                        <th data-options="field:'thanhtien',width:80,formatter:formatCurrency,align:'right'"><b>Thành tiền(VNĐ)</b></th> 
+                        <th data-options="field:'solopass',width:50"><b>Số lô</b></th> 
+                        <th data-options="field:'soqr',align:'center',editor:{type:'text'},width:60"><b>Số QR</b></th>   
+                    </tr>
+                </thead>
+            </table> 
+            <!--toolbar nhập qr-->
+            <div id="toolbar_nhapqr">   
+                <label>Số QR</label>
+                <input type="text" id="nhap-qr"  style="width:150px; text-align: start; margin: 0px; padding-top: 0px; padding-bottom: 0px; height: 26px; line-height: 26px; border-radius: 5px; border: 1px solid #95b8e7;" >
+            </div>
+        </div>
+
+        <!--dialog tạo phiếu xuất đơn hàng-->
+        <div id="dlg-nhandh" title="Tạo phiếu xuất đơn hàng" class="easyui-dialog" 
+            style="width:400px;height:fit-content;padding:10px 20px"
+            closed="true" buttons="#bt-congnoncc-tcn"
+        >
+            <form id="fm-nhandh" method="post">
+                {% csrf_token %}
+                <div class="fitem" style="margin-left: 80px">
+
+                    <input  id="tongthanh_pp" class="easyui-numberspinner" label="Tổng thanh:" 
+                    data-options="min:0,groupSeparator:'.',suffix:'VND'" labelPosition="top"
+                    style="width:200px;height:50px;" >
+
+                    <select required="true" name="" id="cbb-nhandh-hinhthuctt" label="Hình thức thanh toán:" labelPosition="top" name="hinhthucthanh" 
+                        class="easyui-combobox" 
+                        style="width:200px;height:50px; " 
+                        data-options="editable:false,"
+                    >
+                        <option value="Chuyển Khoản">Chuyển Khoản</option>
+                        <option value="Tiền Mặt">Tiền Mặt</option>
+                        <option value="Đổi Trả Hàng">Đổi Trả Hàng</option>
+                        <option value="COD">COD</option>
+                        <option value="COD+Phí Ship">COD+Phí Ship</option>
+                        <option value="Phí Ship">Phí Ship</option>
+                        <option value="Khác">Khác</option>
+                    </select>
+
+                    <input id="txtb-nhandh-sotk" label="Số tài khoản:" name="sotaikhoan" labelPosition="top"  
+                        class="easyui-textbox" 
+                        style="width:200px;height: 50px;"
+                    >
+
+                </div>
+                <div>
+                    <a id="taophieuxuatpassdh" class="easyui-linkbutton" data-options="iconCls:'icon-add'" style="width:auto; margin-left: 250px; margin-top: 10px">Tạo phiếu</a>
+                </div>
+            </form>
+        </div>
+
+    </center>
+{% endblock %}
+
+   

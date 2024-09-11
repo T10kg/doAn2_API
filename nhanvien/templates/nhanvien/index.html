@@ -1,0 +1,195 @@
+
+{% extends "../trangchu/header.html" %}
+
+{% load static %}
+{% block js %}
+    <script type="text/javascript" src="{% static 'js/ajax_quanlynhanvien_mini.js' %}"></script>
+    <script>
+        $(function(){
+            $('#dg').datagrid(
+                {
+                url: 'http://127.0.0.1:8000/nhanvien/listnv/',  // URL để gửi yêu cầu AJAX
+                method: 'get',
+                onLoadSuccess: function(data) {
+                    console.log('Data loaded successfully:', data);
+                },
+                onLoadError: function() {
+                    console.log('Error loading data');
+                }
+            }
+            ).datagrid('clientPaging');
+        });
+    </script>
+{% endblock %}
+
+
+
+{% block content %}
+    <center class="content_center" id="noidungnhanvien">
+
+        <table id="dg" title="Quản lý nhân viên" class="easyui-datagrid" style="width: 1521px;height: 600px; margin: auto; border: 2px;"
+            pageSize="20"
+            url=""
+            toolbar="#toolbar" pagination="true"
+            rownumbers="true" fitColumns="true" singleSelect="true"
+        >
+            <thead>
+                <tr>
+                    <th field="maNV" width="80"><b>Mã NV</b></th>
+                    <th field="tenNV" width="100"><b>Tên NV</b></th>
+                    <th field="gioiTinh" width="50"><b>Giới tính</b></th>
+                    <th field="Diachi" width="100"><b>Địa chỉ</b></th>
+                    <th field="ngaySinh" width="60"><b>Ngày sinh</b></th>
+                    <th field="Sdt" width="70"><b>SĐT</b></th>
+                    <th field="soCMT" width="80"><b>Số CMT</b></th>
+                    <th field="Email" width="120"><b>Email</b></th> 
+                    <th field="nguoitao" width="80"><b>Người tạo</b></th> 
+                </tr>
+            </thead>
+
+            <tbody>
+               {% for row in data %}
+                <tr>
+                    <td>{{ row.maNV }}</td>
+                    <td>{{ row.tenNV }}</td>
+                    <td>{{ row.gioiTinh }}</td>
+                    <td>{{ row.Diachi }}</td>
+                    <td>{{ row.Ngaysinh }}</td>
+                    <td>{{ row.Sdt }}</td>
+                    <td>{{ row.soCMT }}</td>
+                    <td>{{ row.Email }}</td>
+                    <td>{{ row.nguoitao }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4">Không có dữ liệu</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+
+        </table>
+
+        <div id="toolbar">
+            <!-- Thêm Mới Thông Tin Nhân Viên -->
+            <a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-add" onclick="themNhanVien()"> Thêm nhân viên </a>
+        
+            <!-- Cập Nhật Thông Tin Nhân Viên -->
+            <a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-edit" onclick="capNhatNhanVien()"> Chỉnh sửa nhân viên </a>
+        
+            <!-- Xóa Nhân Viên -->
+            <a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-remove" onclick="xoaNhanVien()" id="xoa"> Xóa nhân viên </a>
+        
+            <a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-reload" id="taiLai" onclick="$('#dg').datagrid('load',{})"> Tải lại </a>
+
+            <input type="text" placeholder="Tìm kiếm..." name="tim" style="width: 230px;border-radius:5px;border:1px solid #95b8e7" class="easyui-validatebox tb" id="tim">
+            <a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" id="timKiemNhanVien"> Tìm </a>
+
+            <a href="../nhanviens/xuatfile" class="easyui-linkbutton" iconCls="excel_icon">Xuất Excel</a>
+            
+        </div>
+
+        <div id="dlg" 
+            class="easyui-dialog" 
+            style="width:900px; padding:10px 20px"
+            closed="true" 
+            buttons="#dlg-buttons"
+            data-options="modal:true"
+        >
+            <center><div class="ftitle"><b>THÔNG TIN NHÂN VIÊN</b></div></center>
+
+            <form id="fm" method="post">
+                <div id="nv">
+                    <table>
+                        <tr>
+                            <td><label><b>Mã NV :</b></label></td>
+                            <td><input name="maNV" style="width: 220px;height: 30px; border-radius:5px;border:1px solid #95b8e7" class="easyui-validatebox" required="required" id="maNV"></td>
+                            <td><label><b>Tên NV :</b></label></td>
+                            <td><input name="tenNV" style="width: 220px;height: 30px;border-radius:5px;border:1px solid #95b8e7" class="easyui-validatebox" required="required" id="tenNV"></td>
+                        </tr>
+
+                        <tr>
+                            <td><label><b>Giới tính</b></label></td>
+                            <td>
+                                <select name="gioiTinh" style="width: 220px; height: 30px;border-radius:5px; border:1px solid #95b8e7" id="gioiTinh">
+                                    <option value="Nam">Nam</option>
+                                    <option value="Nữ">Nữ</option>
+                                </select>
+                            </td>
+                            <td><label><b>Địa chỉ:</b></label></td>
+                            <td><input name="Diachi" id="diachi" style="width: 220px;height: 30px; border-radius:5px;border:1px solid #95b8e7; margin-top: 3px" class="easyui-validatebox" required="required"></td>
+                        </tr>
+
+                        <tr>
+                            <td style="display: none;"><label><b>Dân tộc :</b></label></td>
+                            <td><input type="hidden" name="Dantoc" id="dantoc" style="width: 220px;height: 30px;"></td>
+
+                            <td style="display: none;"><label><b>Hôn Nhân:</b></label></td>
+                            <td><input type="hidden" name="Honnhan" id="honnhan" style="width: 220px;height: 30px;"></td>
+                        </tr>
+
+                        <tr>
+                            <td><label><b>Số CMT:</b></label></td>
+                            <td><input name="soCMT" id="soCMT" class="easyui-validatebox" style="width: 220px;height: 30px; border-radius:5px;border:1px solid #95b8e7"></td>
+
+                            <td><label><b>Nơi Cấp:</b></label></td>
+                            <td><input name="Noicap" id="noicap" style="width: 220px;height: 30px; border-radius:5px;border:1px solid #95b8e7; margin-top: 3px"></td>
+                        </tr>
+
+                        <tr>
+                            <td><label><b>Ngày sinh:</b></label></td>
+                            <td><input name="ngaySinh" id="ngaySinh" class="easyui-datebox" data-options="formatter:myformatter,parser:myparser,panelHeight:300" style="width: 220px; height: 30px;border:1px solid #95b8e7" required="required"></td>
+
+                            <td><label><b>Số điện thoại:</b></label></td>
+                            <td><input name="Sdt" id="soDT" style="width: 220px;height: 30px; border-radius:5px;border:1px solid #95b8e7; margin-top: 3px"  class="easyui-validatebox"></td>
+                        </tr>
+
+                        <tr>
+                            <td style="display: none;"><label><b>Quốc Tịch:</b></label></td>
+                            <td><input type="hidden" name="Quoctich" id="Quoctich" class="easyui-validatebox" style="width: 220px;height: 30px;"></td>
+
+                            <td style="display: none;"><label><b>Tôn giáo:</b></label></td>
+                            <td><input type="hidden" name="Tongiao" id="tongiao" style="width: 220px;height: 30px;"></td>
+                        </tr>
+
+                        <tr>
+                            <td><label><b>Email:</b></label></td>
+                            <td><input name="Email" id="Email" class="easyui-validatebox" style="width: 220px;height: 30px; border-radius:5px;border:1px solid #95b8e7" validType="email"></td>
+
+                            <td><label><b>Bộ phận:</b></label></td>
+                            <td>
+                                <input name="maPB" id="maPB" style="width: 220px;height: 30px;" class="easyui-combobox" required="required" data-options="editable:false,valueField: 'maPB',textField: 'tenPB',url: '{% url 'nhanvien:dsPB' %}'">
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td><label class="div_matKhau"><b>Mật khẩu:</b></label></td>
+                            <td><span class="div_matKhau"><input type="password" id = "matKhau" name="matKhau" style="width: 220px;height: 30px;border-radius:5px;border:1px solid #95b8e7; margin-top: 3px" id="matKhau" class="easyui-validatebox" required="required"></span></td>
+
+                            <td><label><b>Nhóm:</b></label></td>
+                            <td>
+                                <input name="MaCV" id="MaCV" style="width: 220px;height: 30px;" class="easyui-combobox" required="required" data-options="editable:false,valueField: 'MaCV',textField: 'tenCV',url: '{% url 'nhanvien:dsCV' %}'">
+                            </td>
+                        </tr>
+
+                        <tr style="display: none;">
+                            <td><label><b>Loại NV:</b></label></td>
+                            <td colspan="2">
+                                <input type="radio" style="width: 20px; height: 15px;" name="loaikho" id="tongcongty" value="0" checked="checked"> <label>Công Ty</label>
+                                <input type="radio" style="width: 20px; height: 15px;" name="loaikho" id="daily" value="1"> <label>Đại lý</label>
+                            </td>
+                        </tr>
+                    </table>
+                </div>      
+            </form>
+
+            <div id="thongbaonhanvien"></div>
+        </div>
+
+        <div id="dlg-buttons">
+            <a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-save" id="luuNhanVien"><b>Lưu</b></a>
+            <a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-ok" id="capnhatNhanVien" onclick="capNhatNhanVien()"><b>Cập nhật</b></a>
+            <a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#dlg').dialog('close');$('#dg').datagrid('reload');"><b>Thoát</b></a>
+        </div>
+
+    </center>
+{% endblock %}

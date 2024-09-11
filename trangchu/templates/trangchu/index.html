@@ -1,0 +1,149 @@
+{% extends "trangchu/header.html" %}
+
+{% load static %}
+{% block content %}
+    <center>
+        <div class="content">
+
+            <div class="info">
+                <div style="padding: 10px;">
+                    <center>
+                        <span style="text-transform: uppercase; color: #0e4a92;">Thông tin nhân viên</span>
+                    </center>
+                </div>
+                <table class="table">
+                    <tbody>
+                        <tr>
+                            <td>Mã Nhân viên:</td>
+                            <td>VP1 </td>
+                        </tr>
+                                
+                        <tr>
+                            <td>Họ và Tên NV:</td>
+                            <td>Phòng IT </td>
+                        </tr>
+                                
+                        <tr>
+                            <td>Ngày sinh:</td>
+                            <td>30-10-2018 </td>
+                        </tr>
+                                
+                        <tr>
+                            <td>Giới Tính:</td>
+                            <td>Nam </td>
+                        </tr>
+                                
+                        <tr>
+                            <td>Phòng:</td>
+                            <td>Nhà phân phôi </td>
+                        </tr>
+                                
+                        <tr>
+                            <td>Chức vụ:</td>
+                            <td>Quản lý </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="chucnang">
+                <div class="chucnangitem">
+                    <a href="#">
+                        <center><img src="{% static 'image/doanhsoql.svg' %}" width="70" alt=""><br><span>Doanh số Bỏ</span></center>
+                    </a>
+                </div>
+                <div class="chucnangitem">
+                    <a href="{% url 'congno:congnoncc' %}">
+                        <center><img src="{% static 'image/ncc.png' %}" width="70" alt=""><br><span>Công nợ nhà cung cấp</span></center>
+                    </a>
+                </div>
+                <div class="chucnangitem">
+                    <a href="{% url 'congno:congnokh' %}">
+                        <center><img src="{% static 'image/congno.png' %}" width="70" alt=""><br><span>Công nợ khách hàng</span></center>
+                    </a>
+                </div>
+                <div class="chucnangitem">
+                    <a href="{% url 'ghinokh:index' %}">
+                        <center><img src="{% static 'image/ghino.svg' %}" width="70" alt=""><br><span>Ghi nợ khách hàng</span></center>
+                    </a>
+                </div>
+                <div class="chucnangitem">
+                    <a href="{% url 'sanpham:index' %}">
+                        <center><img src="{% static 'image/sanpham.jpg' %}" width="70" alt=""><br><span>Sản phẩm</span></center>
+                    </a>
+                </div>
+                <div class="chucnangitem">
+                    <a href="{% url 'khohang:index' %}">
+                        <center><img src="{% static 'image/thongtinkho.svg' %}" width="70" alt=""><br><span>Thông tin kho</span></center>
+                    </a>
+                </div>
+                <div class="chucnangitem">
+                    <a href="{% url 'nhapkho:index' %}">
+                        <center><img src="{% static 'image/nhapkho.svg' %}" width="70" alt=""><br><span>Nhập kho</span></center>
+                    </a>
+                </div>
+                <div class="chucnangitem">
+                    <a href="{% url 'phieuxuatkho:index' %}">
+                        <center><img src="{% static 'image/taophieuxuat.svg' %}" width="70" alt=""><br><span>Tạo phiếu xuất kho</span></center>
+                    </a>
+                </div>
+                <div class="chucnangitem">
+                    <a href="{% url 'tracuucapnhatthongtin:tracuuthongtin' %}">
+                        <center><img src="{% static 'image/taophieuxuat.svg' %}" width="70" alt=""><br><span>Tra cứu thông tin PX</span></center>
+                    </a>
+                </div>
+                <div class="chucnangitem">
+                    <a href="{% url 'tracuucapnhatthongtin:index' %}">
+                        <center><img src="{% static 'image/taophieuxuat.svg' %}" width="70" alt=""><br><span>Tra cứu và cập nhật thông tin PX</span></center>
+                    </a>
+                </div>
+                <div class="chucnangitem">
+                    <a href="{% url 'xuatkho:index' %}">
+                        <center><img src="{% static 'image/xuatkho.svg' %}" width="70" alt=""><br><span>Xuất kho</span></center>
+                    </a>
+                </div>
+                <div class="chucnangitem">
+                    <a href="{% url 'chuyenkhodaily:index' %}">
+                        <center><img src="{% static 'image/chuyenkhodaily.svg' %}" width="70" alt=""><br><span>Chuyển kho đại lý</span></center>
+                    </a>
+                </div>
+                <div class="chucnangitem">
+                    <a href="{% url 'chuyenkhonoibo:index' %}">
+                        <center><img src="{% static 'image/chuyenkho.svg' %}" width="70" alt=""><br><span>Chuyển kho nội bộ</span></center>
+                    </a>
+                </div>
+                <div class="chucnangitem">
+                    <a href="{% url 'phieudoitra:index' %}">
+                        <center><img src="{% static 'image/doitrahang.svg' %}" width="70" alt=""><br><span>Đổi trả hàng</span></center>
+                    </a>
+                </div>
+                <div class="chucnangitem">
+                    <a href="{% url 'tonkho:index' %}">
+                        <center><img src="{% static 'image/tk.svg' %}" width="70" alt=""><br><span>Tồn kho</span></center>
+                    </a>
+                </div>
+                <div class="chucnangitem">
+                    <a href="{% url 'nhandonhang:index' %}">
+                        <center><img src="{% static 'image/nhandh.svg' %}" width="70" alt=""><br><span>Nhận đơn hàng</span></center>
+                    </a>
+                </div>
+                <div class="chucnangitem">
+                    <a href="{% url 'khachhang:index' %}">
+                        <center><img src="{% static 'image/anh.svg' %}" width="70" alt=""><br><span>Khách hàng</span></center>
+                    </a>
+                </div>
+                <div class="chucnangitem">
+                    <a href="{% url 'nhanvien:index' %}">
+                        <center><img src="{% static 'image/nv.svg' %}" width="70" alt=""><br><span>Quản lý nhân viên</span></center>
+                    </a>
+                </div>
+                <div class="chucnangitem">
+                    <a href="{% url 'tochuc:index' %}">
+                        <center><img src="{% static 'image/ql_tochuc.svg' %}" width="70" alt=""><br><span>Quản lý tổ chức</span></center>
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </center>
+{% endblock %}

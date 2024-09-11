@@ -1,0 +1,187 @@
+{% extends "../trangchu/header.html" %}
+
+{% load static %}
+{% block js %}
+<script type="text/javascript" src="{% static 'js/ajax_congnokh_sale_mini.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/ajax_quanlyxuatkkhonhanvienql_mini.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+    <center class="content_center">
+
+        <div class="easyui-panel" title="Quản lý ghi nợ khách hàng" collapsible="true" style="width: 1521px;height: 600px;">
+            <table class="easyui-datagrid" id="ghinokh-main-dg" style="width: 100%;height: 100%;" 
+                data-options="
+                    url:'taidulieughino',
+                    fitColumns:true,
+                    showFooter:true,
+                    toolbar:'#toolbar_cnkhsale',
+                    rownumbers:true,
+                    singleSelect:true,
+                    pagination:true"
+            >
+                <thead>
+                    <tr>
+                        <th data-options="field:'mapdtxt',width:150"><b>Mã PDT</b></th>
+                        <th data-options="field:'Ten',width:150"><b>Tên Khách Hàng</b></th>
+                        <th data-options="field:'Dienthoai',width:100"><b>Số Điện Thoại</b></th>
+                        <th data-options="field:'tongghino',width:150,formatter:formatCurrency,align:'right'"><b>Tổng Nợ KH(VNĐ)</b></th>
+                        <th data-options="field:'tongthanhghino',width:100,formatter:formatCurrency,align:'right'"><b>Tổng Trả(VNĐ)</b></th>
+                        <th data-options="field:'noconlai',width:100,formatter:formatCurrency,align:'right'"><b>Còn Nợ KH(VNĐ)</b></th>
+                    </tr>
+                </thead> 
+                
+                <tbody>
+                    <tr>
+                        <td>92727</td>
+                        <td>XKKG240520001</td>
+                        <td>019191994</td>
+                        <td>6200000</td>
+                        <td>0</td>
+                        <td>6200000</td>
+                    </tr>
+                </tbody>
+    
+            </table>
+        </div>
+    
+        <div id="toolbar_cnkhsale">
+            <div>
+                <span class="easyui-linkbutton" iconCls="icon-detail" onclick="thanhghinokh()">Thanh ghi nợ</span>
+                <span class="easyui-linkbutton" iconCls="icon-remove" onclick="xoaghinokh()">Xóa ghi nợ</span>
+                <span>
+                    <input type="text" id="cnkhsale-search-box" style="width: 400px;" class="easyui-textbox" prompt="nhập Manv, Tên NV xuất phiếu, sdt kh..." 
+                        data-options="onChange:function(val1,val2){
+                            $('#ghinokh-main-dg').datagrid('load',{timkiemghino:val1});
+                        }"  
+                    >
+                </span>
+    
+                <span>Chọn Khách Hàng <input type="text" id="cnkhsale-kh-cbb" class="easyui-combobox" style="width:165px;" 
+                    data-options="
+                        valueField:'MaKH',
+                        textField:'Ten',
+                        url:'../khachhangs/dskh',
+                        prompt:'Tên khách hàng',
+                        onChange: function(newval,oldval){
+                            $('#ghinokh-main-dg').datagrid('load',{timkiemmkh:newval});
+                        }"
+                >
+                </span>
+    
+                <span class="easyui-linkbutton" iconCls="icon-reload" onclick="$('#ghinokh-main-dg').datagrid('load',{m:''})">Tải Lại</span>
+                
+                <a class="easyui-linkbutton l-btn l-btn-small" iconcls="icon-detail" group="" onclick="xemchitietpdt()">Xem chi tiết phiếu đổi trả</a>
+            </div>
+        </div>
+    
+        <div id="thanhghino-tcn-dlg" class="easyui-dialog" 
+            style="width:600px;height:fit-content;padding:10px 20px"
+            closed="true" 
+            buttons="#cnkhsale-tcn-buttons"
+        >
+            <div class="ftitle" style="text-align:center">Thông Tin Thanh ghi Nợ</div>
+    
+            <form id="cnkhsale-tcn-fm" method="">
+                {% csrf_token %}
+                <div class="fitem">
+                    <label style="width:120px">Nợ Còn Lại (VNĐ):</label>
+                    <input name="" id="txtb-noconlai" class="easyui-numberbox" readonly="true" style="width:400px;" 
+                        data-options="groupSeparator:',',min:0"
+                    >
+                </div>
+    
+                <div class="fitem">
+                    <label style="width:120px">Tiền Thanh (VNĐ):</label>
+                    <input name="" id="txtb-tienthanh" class="easyui-numberbox" style="width:400px" required="true" 
+                        data-options="groupSeparator:',',min:0"
+                    >
+                </div>
+    
+                <div class="fitem">
+                    <label style="width:120px">Ghi Chú:</label>
+                    <input name="" id="ghichu" class="easyui-textbox" multiline="true"  style="width: 400px; height: 150px;">
+                </div>
+    
+            </form>
+        </div> 
+    
+        <div id="cnkhsale-tcn-buttons">
+            <a  class="easyui-linkbutton" id="thanhghino" iconCls="icon-ok">Thanh Toán</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton" onclick="javascript:$('#thanhghino-tcn-dlg').dialog('close')" iconCls="icon-cancel">Hủy</a>
+        </div>
+    
+        <!-- Xem chi tiết phiếu đổi trả -->
+        <div id="chitietphieuxuat" class="easyui-dialog" title="Thông tin chi tiết đổi trả" data-options="" closed="true" style="width:1100px;height: 90%;padding:10px">
+            <center>
+                <form action="" id="qlxk-frm_phieuxuat">
+                    {% csrf_token %}
+                    <table style=" width: 90%;height: 50%; border: 1px solid #000000; border-collapse: collapse;" border="1">
+                        <tr>
+                            <td>
+                                <b>Tên khách hàng :</b> <span id="tenkh"></span> 
+                            </td>
+                            <td>
+                                <b>Địa chỉ: </b><span id="diachikh"></span>
+                            </td>
+                            <td>
+                                <b>Số điện thoại: </b> <span id="sodt"></span>
+                            </td>    
+                        </tr>
+                        <tr>
+                            <td>
+                                <b>Tổng tiền cần thanh :</b> <span id="tongthanh"></span> 
+                            </td>
+                            <td>
+                                <b>Tổng đã trả: </b><span id="tongtra"></span>
+                            </td>
+                            <td>
+                                <b>Nợ còn lại:</b> <span id="noconlai"></span>
+                            </td>
+                        </tr>
+                    </table>
+                </form>
+            </center> 
+            <br>
+            <table id="chitietsanphamphieuxuat" class="easyui-datagrid" title="Danh sách sản phẩm đổi trả" 
+                style=" width:99%; height:auto" 
+                fitColumns="true" showFooter="true" pagination="true"
+                rownumbers="true"   
+                data-options="fitColumns:true,singleSelect: true"
+            >
+                <thead>
+                    <tr>
+                        <th data-options="field:'masanpham' ,width:'50px' "><b>MaSP</b></th>
+                        <th data-options="field:'tensp' ,width:'300px' "><b>Tên sản phẩm</b></th>
+                        <th data-options="field:'soluong',align:'center',editor:'numberbox',"><b>Số lượng</b></th>
+    
+                        <th data-options="  
+                            field:'gia',
+                            align:'right',
+                            editor:{type:'numberspinner',options:{groupSeparator:'.' ,min:1,suffix:'VND'}}
+                        "><b>Đơn giá(VNĐ)</b></th>
+    
+                        <th data-options="
+                            field:'chietkhau',
+                            align:'center',
+                            editor:{type:'numberspinner',}
+                        "><b>Chiết khấu(%)</b></th> 
+    
+                        <th data-options="
+                            field:'thanhtien',
+                            formatter:formatCurrency,
+                            width:'100px',
+                            align:'right',
+                            editor:{type:'numberspinner'},
+                        "><b>Thành tiền(VNĐ)</b></th> 
+    
+                        <th data-options="field:'tenkho',align:'center'" width="100px;"><b>Kho hàng</b></th>
+            
+                    </tr>
+                </thead>
+            </table> 
+        </div>
+
+    </center>
+{% endblock %}
+    

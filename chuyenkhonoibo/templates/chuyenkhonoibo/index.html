@@ -1,0 +1,149 @@
+{% extends "../trangchu/header.html" %}
+
+{% load static %}
+{% block js %}
+<script type="text/javascript" src="{% static 'js/ajax_chuyenkho_mini.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+    <center class="content_center">
+
+        <table id="dg-chuyenkho" class="easyui-datagrid" title="Chuyển kho" 
+            style="width: 1521px;height: 600px;"
+            data-options="
+                rownumbers:true,
+                singleSelect:true,
+                url:'taidulieuchuyenkho',
+                toolbar:'#tb-chuyenkho',
+                pagination:true,"
+        >
+            <thead>
+                <tr>
+                    <th data-options="field:'id',width:150, align:'center'" ><b>idCK</b></th>
+                    <th data-options="field:'mapx',width:150, align:'center'" ><b>idPX</b></th>
+                    <th data-options="field:'tenkho',width:150" ><b>Chuyển từ</b></th>
+                    <th data-options="field:'tenkhoden',width:150" ><b>Đến kho</b></th>
+                    <th data-options="field:'ngayxuat',width:190, align:'center'" ><b>Ngày chuyển</b></th>
+                    <th data-options="field:'tenNV',width:190, align:'lefy'"><b>Người chuyển</b></th>
+                    <th data-options="field:'phuongthucvanchuyen',width:300, align:'left'"><b>Phương thức vận chuyển</b></th>
+
+                    <th data-options="field:'tinhtrang',width:200, align:'right',
+                        formatter: function(value,row,index){
+                            if(value=='1'){
+                                return 'Đã nhập kho'
+                            } else{
+                                return 'Chưa nhập kho'
+                            }
+                        } "
+                    >
+                        <b>Tình trạng</b>
+                    </th>
+                </tr>
+            </thead>
+
+            <tbody>
+                <tr>
+                    <td>92727</td>
+                    <td>XKKG240520001</td>
+                    <td>Kho test 3</td>
+                    <td>Kho test 2</td>
+                    <td>18-02-2022</td>
+                    <td>khgdjfgha</td>
+                    <td></td>
+                    <td>0</td>
+                </tr>
+            </tbody>
+
+        </table>
+
+
+        <div id="tb-chuyenkho" style="padding:2px 5px;">
+    
+            <a  onclick="
+                var row1=$('#dg-chuyenkho').datagrid('getSelected');
+                if(row1){
+                    if(row1.tinhtrang=='1'){
+                        thongbao('Phiếu đã được nhập kho, vui lòng chọn phiếu khác');
+                        return false;
+                    }
+                    else{
+                        $('#nhapkho_phieuchuyenkho').dialog('open');
+                    }
+                }
+                else{
+                    thongbao('Vui lòng chọn phiếu cần nhập kho')
+                }"  
+                class="easyui-linkbutton" 
+                data-options="iconCls:'icon-save'"
+                style="width:auto">Nhập kho</a> 
+        
+            <a  class="easyui-linkbutton" iconCls="icon-list" onclick="$('#dg-chuyenkho').datagrid('load',{chuyenkho:''})">
+                Danh sách chuyển kho
+            </a>
+
+            <a  class="easyui-linkbutton" iconCls="icon-reload" onclick="$('#dg-chuyenkho').datagrid('load',{chuyen:''})">
+                Tải lại
+            </a>
+        
+        </div>
+
+
+        <div id="nhapkho_phieuchuyenkho" class="easyui-dialog" title="TẠO PHIẾU NHẬP" data-options="" closed="true" style="width:500px;height:300;padding:10px">
+            <table style=" width: 90%;height: 50%" align="center">
+                <tr>
+                    <td colspan="2" align="center">
+                        <select id="qlnk-phieuchuyen-nguoncap-cbb" class="easyui-combogrid" style="width:90%;margin-top: 20px;height: 50px;border-radius:5px;border:1px solid #95b8e7" labelWidth="150px" 
+                            data-options="
+                                required:true,
+                                panelWidth: 600,
+                                idField: 'Mansx',
+                                textField: 'Tennsx',
+                                url: '../nhapkhos/taidulieunhapkho?nhacungcap',
+                                onSelect:function(record){},
+                                columns: [[
+                                    {field:'Tennsx',align:'left',title:'<b>Tên NCC</b>',width:80},
+                                    {field:'Sdt',align:'center',title:'<b>Số điện thoại</b>',width:120},
+                                    {field:'diachi',align:'center',title:'<b>Địa chỉ</b>',width:80,align:'right'},
+                                ]],
+                                fitColumns: true,
+                                label: 'Chọn nguồn cấp:',
+                                labelPosition: 'top',"
+                        >                                      
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td align="center" colspan="2" style="padding: 10px;" >
+                        <center>
+
+                            <a class="easyui-linkbutton" 
+                                data-options="
+                                    iconAlign:'top',
+                                    onClick:function(){
+                                        $('#nhapkho_phieuchuyenkho').dialog('close');
+                                    }" 
+                                style="float: right;margin-right: 30px;margin-right: 35%;width: 100px;" align="center" >
+                                Thoát
+                            </a>
+
+                            <a class="easyui-linkbutton"
+                                id="nhapkhophieuchuyennoibo" 
+                                data-options="
+                                size:'small',
+                                iconAlign:'top'" 
+                                style="width: 100px;
+                                margin-right: 20px;
+                                float: right;" onclick="nhapkhophieuchuyenkho()">
+                                Lưu thông tin 
+                            </a>
+
+                        </center>
+                    </td> 
+                    
+                </tr>
+            </table>
+        </div>
+
+    </center>
+{% endblock %}
+   

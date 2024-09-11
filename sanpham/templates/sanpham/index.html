@@ -1,0 +1,199 @@
+{% extends "../trangchu/header.html" %}
+
+{% load static %}
+{% block js %}
+<script src="{% static 'path/to/ckfinder/ckfinder.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/ajax_sanpham.js' %}"></script>
+<script>
+
+        $(function(){
+            $('#dg').datagrid(
+                {
+                url: 'http://127.0.0.1:8000/sanpham/list_sanpham/',  // URL để gửi yêu cầu AJAX
+                method: 'get',
+                onLoadSuccess: function(data) {
+                    console.log('Data loaded successfully:', data);
+                },
+                onLoadError: function() {
+                    console.log('Error loading data');
+                }
+            }
+            ).datagrid('clientPaging');
+        });
+        function openCKFinder() {
+            CKFinder.modal({
+                // Cấu hình CKFinder tại đây nếu cần
+                chooseFiles: true,
+                onInit: function (finder) {
+                    finder.on('files:choose', function (evt) {
+                        var file = evt.data.files.first();
+                        var fileUrl = file.getUrl();
+                        document.getElementById('xFilePath').value = fileUrl;
+                    });
+                }
+            });
+        }
+    </script>
+{% endblock %}
+
+{% block content %}
+    <center class="content_center">
+
+        <table id="dg" title="Danh sách sản phẩm" class="easyui-datagrid" style="width: 1521px;height: 600px; margin: auto; border: 2px;"
+            url="" sortName="tensp" iconCls='icon-save'
+            toolbar="#toolbar" pagination="true"
+            rownumbers="true"  singleSelect="true" 
+            sortOrder="asc" collapsible="true" remoteSort="false"
+            fit="true"  
+        >
+            <thead>
+                <tr>
+                    <th data-options="field:'MaSP'" width="10%">Mã sản phẩm</th>
+                    <th data-options="field:'tensp'" width="20%">Tên sản phẩm</th>
+                    <th data-options="field:'tennhom'" width="10%">Nhãn hàng</th>
+                    <th data-options="field:'tenloaisp'" width="10%">Nhóm hàng</th>
+                    <th data-options="field:'gia_nhap', formatter: function(value,row,index){
+                        return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')
+                    }" width="10%">Giá nhập (VNĐ)</th>
+                    <th data-options="field:'gia_ban', formatter: function(value,row,index){
+                        return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')
+                    }" width="10%">Giá bán (VNĐ)</th>
+                    <th data-options="field:'Tendvt'" width="10%">Đơn vị tính</th>
+                    <th data-options="field:'Mota'" width="20%">Mô tả</th>
+                </tr>
+            </thead>
+
+            
+        </table>
+
+        <div id="toolbar">
+            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-add"   onclick="themSP()">Thêm </a>
+            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit"   onclick="suasp()">Chỉnh sửa</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-remove"    onclick="Xoasp()">Xóa</a>
+
+            <a href="{% url 'sanpham:nhacungcap' %}" class="easyui-linkbutton" iconCls="icon-edit">Nhà cung cấp</a>
+            <a href="{% url 'sanpham:nhanhang' %}" class="easyui-linkbutton" iconCls="icon-remove">Nhãn hàng/Nhà sản xuất</a>
+
+            <a href="#" class="easyui-linkbutton" iconCls="icon-save"  onclick="importDuLieu()">Thêm file</a>
+            <a href="#" class="easyui-linkbutton" iconCls="icon-reload"  id="taiLai"   onclick="taiLai()">Tải lại</a>
+
+            <input class="easyui-combobox"  id="nhomsp" 
+                    data-options="prompt:'Chọn nhãn hàng...',
+                        url:'../sanphams/combobox_nhomsp',
+                        valueField: 'manhom',
+                        textField: 'tennhom', 
+                        onChange:function(newval,oldval){
+                            $('#dg').datagrid('load',{nhomsp:newval})
+                        }" 
+                    style="width: 190px;height:30px;"
+            />
+
+            <input type="text"  name="tim" id="tim" style="width: 250px;border-radius:5px;border:1px solid #95b8e7" class="easyui-validatebox tb"  onchange="timsp()" placeholder="Tìm kiếm...">
+            <a href="#" class="easyui-linkbutton" iconCls="icon-search"   onclick="timsp()">Tìm</a>
+            <a href="#" onclick="xuatexcel_nhomsp()" class="easyui-linkbutton"   iconCls="excel_icon" >Xuất Excel</a>
+        </div>
+
+        <div id="dlg" class="easyui-dialog" style="width:500px;height:560px;padding:10px 20px"
+            closed="true" buttons="#dlg-buttons2">
+            <div class="ftitle">Thông tin sản phẩm</div>
+            <form id="fm" action="" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <table>
+                    <tr>
+                        <td>Mã sản phẩm:</td>
+                        <td><input class="easyui-textbox" id="maSanPham" name="maSanPham" style="width:260px;" data-options="required:true" ></input></td>
+                    </tr>
+                    <tr>
+                        <td>Tên sản phẩm:</td>
+                        <td><input class="easyui-textbox" id="ten" name="ten" style="width:260px;" data-options="required:true" ></input></td>
+                    </tr>
+                    <tr>
+                        <td><label><b>Loại sản phẩm:</b></label></td>
+                            <td>
+                                <input name="loaisp" id="loaisp" style="width: 220px;height: 30px;" class="easyui-combobox" required="required" data-options="editable:false,valueField: 'maloaisp',textField: 'tenloaisp',url: '{% url 'sanpham:loaisp' %}'">
+                            </td>
+                        {% comment %} <td>Loại sản phẩm:</td>
+                        <td>
+                            <select id="loaisp" class="easyui-combobox" name="loaisp" style="width:260px;">
+                                <option value="aa">Loại sản phẩm</option>
+                                <option>bitem2</option>
+                                <option>bitem3</option>
+                                <option>ditem4</option>
+                                <option>eitem5</option>
+                            </select>
+                        </td> {% endcomment %}
+                    </tr>
+                    <tr>
+                        <td>Giá nhập:</td>
+                        <td>
+                            <input class="easyui-numberspinner" id="gia_nhap" name="gia_nhap" data-options="required:true,groupSeparator:',',decimalSeparator:'.',prefix:'VND',min:0,precision:2" value="0" style="width:260px;"
+                            data-options="required:true,precision:2,groupSeparator:',',decimalSeparator:'.',prefix:'VND'">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Giá bán:</td>
+                        <td>
+                            <input class="easyui-numberspinner" id="gia_ban" name="gia_ban" data-options="required:true,groupSeparator:',',decimalSeparator:'.',prefix:'VND',min:0,precision:2" value="0" style="width:260px;"
+                            data-options="required:true,precision:2,groupSeparator:',',decimalSeparator:'.',prefix:'VND'">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Chiết khấu:</td>
+                        <td>
+                            <input class="easyui-numberspinner" id="chietkhau" name="chietkhau" value="0" style="width:260px;"
+                            data-options="precision:2,groupSeparator:',',decimalSeparator:'.',prefix:'%'">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Xuất xứ:</td>
+                        <td><input name="xx" id="xx" data-options="validType:'maxLength[5]'" style="width:260px;" class="f1 easyui-textbox"></input></td>
+                    </tr>
+                    <tr>
+                        <td>Mô tả:</td>
+                        <td><textarea name="mt" id="mt" placeholder="Mô tả sản phẩm..." rows="4" cols="33"></textarea></td>
+                    </tr>
+                    <tr>
+                        <td><label><b>Nhà sản xuất:</b></label></td>
+                            <td>
+                                <input name="Mansx" id="Mansx" style="width: 220px;height: 30px;" class="easyui-combobox" required="required" data-options="editable:false,valueField: 'Mansx',textField: 'Tennsx',url: '{% url 'sanpham:ncc' %}'">
+                            </td>
+                    </tr>
+                    <tr>
+                        <td><label><b>Nhãn hàng:</b></label></td>
+                            <td>
+                                <input name="manhom" id="manhom" style="width: 220px;height: 30px;" class="easyui-combobox" required="required" data-options="editable:false,valueField: 'manhom',textField: 'tennhom',url: '{% url 'sanpham:nhomsps' %}'">
+                            </td>
+                    </tr>
+                    <tr>
+                        <td><label><b>Dơn vị tính:</b></label></td>
+                            <td>
+                                <input name="Madvt" id="Madvt" style="width: 220px;height: 30px;" class="easyui-combobox" required="required" data-options="editable:false,valueField: 'Madvt',textField: 'Tendvt',url: '{% url 'sanpham:donvitinhs' %}'">
+                            </td>
+                        {% comment %} <td>Đơn vị tính:</td>         
+                        <td>
+                            <select id="Tendvt">
+                                <option value="">-- Chọn danh mục --</option>
+                            </select>
+                        </td> {% endcomment %}
+                    </tr>
+                    <tr>
+                        <td>Chọn ảnh sản phẩm:</td>
+                        <td>
+                            <input type='button' value='Chọn ảnh sản phẩm' width='200px' onclick='BrowseServer(); ' id='anh' />
+                            <input style='display: block!important;' class='easyui-validatebox tb' id='xFilePath' name='Url'  />
+                        </td> 
+                    </tr>
+                </table>
+            </form>
+        </div>
+        <div id="dlg-buttons2">
+            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-ok" id="luuSP">Lưu</a>
+            <a href="#" class="easyui-linkbutton" iconCls="icon-ok"  id="capnhatSP">Cập Nhật</a>
+            <a href="#" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#dlg').dialog('close')">Hủy</a>
+        </div>
+
+    </center>
+
+
+    
+{% endblock %}

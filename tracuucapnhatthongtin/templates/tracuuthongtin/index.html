@@ -1,0 +1,128 @@
+{% extends "../trangchu/header.html" %}
+
+{% load static %}
+{% block js %}
+<script type="text/javascript" src="{% static 'js/ajax_quanlyxuatkkhonhanvienql_mini.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+    <center class="content_center">
+
+        <table id="qlxk-dg" 
+            class="easyui-datagrid" 
+            title="Tra cứu thông tin PX" 
+            style="width: 1521px;height: 600px;"
+            pageSize="20"
+            data-options="rownumbers:true, singleSelect:true, toolbar:'#qlxk-tb-dg', pagination:true,"
+        >
+            <thead>
+                <tr>
+                    <th data-options="field:'id',width:50, align:'center'" ><b>id</b></th>
+                    <th data-options="field:'maPhieuxuat',width:150, align:'center'" ><b>Mã phiếu xuất</b></th>
+                    <th data-options="field:'tenNVKD',width:160" ><b>NV kinh doanh</b></th>
+                    <th data-options="field:'Ten',width:170"><b>Tên khách hàng</b></th>
+                    <th data-options="field:'tongphieuX',width:120, align:'right', formatter:formatCurrency"><b>Tổng phiếu(VNĐ)</b></th>
+                    <th data-options="field:'tongthanhtoan',width:139, align:'right', formatter:formatCurrency"><b>Tổng trả trước(VNĐ)</b></th>
+                    <th data-options="field:'noconlai',width:132, align:'right', formatter:formatCurrency"><b>Số nợ còn lại(VNĐ)</b></th>
+                    <th data-options="field:'ngayxuat',width:160,align:'center'"><b>Ngày tạo phiếu</b></th>
+                    <th data-options="field:'hinhthucthanh',width:160,align:'left'"><b>Hình thức thanh toán</b></th>
+
+                    <th data-options="field:'tinhtrang',width:170,align:'center',
+                        formatter:function(value,row,index){
+                            if(value=='0'){
+                                return 'Chưa xuất phiếu'
+                            } else{ 
+                                return 'Đã xuất phiếu'
+                            }
+                        }"
+                    >
+                        <b>Tình trạng</b>
+                    </th>
+
+                    <th data-options="field:'ghichu',width:200,align:'center'"><b>Ghi chú</b></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>92727</td>
+                    <td>XKKG240520001</td>
+                    <td>Phòng IT</td>
+                    <td>khgdjfgha</td>
+                    <td>900.000</td>
+                    <td>0</td>
+                    <td>900.000</td>
+                    <td>2024-05-20 12:27:24</td>
+                    <td>Chuyển Khoản</td>
+                    <td>1</td>
+                    <td>Mibiti Prudente </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!--toolbar of the datagrid SẢN PHẨM-->
+        <div id="qlxk-tb-dg" style="padding:2px 5px;">
+
+            <!-- chuyển kho đại lý -->
+            <a href="#" iconCls="icon-list" onclick="chuyenkhodaily()" class="easyui-linkbutton">Chuyển kho đại lý</a>
+
+            <a class="easyui-linkbutton" iconCls="icon-list" onclick="$('#qlxk-dg').datagrid('load',{danhsachcanchuyenkho:''})">PX cần chuyển kho NPP</a>   
+
+            <!--TÌm kiếm theo dữ liệu nhập vào từ textbox-->
+            <input class="easyui-textbox" 
+                id="textsearchkho" 
+                data-options="prompt:'Tìm mã PX, mã QR',
+                    onChange:function(val1,val2){
+                        $('#qlxk-dg').datagrid('load',{timkiemphieuxuat:val1})
+                    }" 
+                style="width:300px;"
+            >
+
+            Từ: <input id="db-QLXK-from" class="easyui-datebox" data-options="formatter:myformatter,parser:myparser,panelHeight:300" style="width:130px;">
+            đến: <input id="db-QLXK-to" class="easyui-datebox" data-options="formatter:myformatter,parser:myparser,panelHeight:300" style="width:130px;">
+
+            <!--Tìm kiếm kết hợp từ ngày, nhân viên, khách  hàng -->
+            <a class="easyui-linkbutton" data-options="iconCls:'icon-search'" style="width:auto" onclick="
+                $searchtext=$('#khonhanvienquanlykho').combobox('getValue').trim()
+                $makh=$('#khachhang_xk').combobox('getValue')
+                $nvkd=$('#nhanvienkd_xk').combobox('getValue')
+                $bien={makho:$searchtext,makh:$makh,nvkd:$nvkd}
+                timkiemkethop('db-QLXK-from','db-QLXK-to','qlxk-dg',$bien)">
+                Tìm kiếm
+            </a>
+
+            <!--Xuất file PDF phiếu xuất-->
+            <a href="#" onclick="xuatphieuxuatkhopdf()" class="easyui-linkbutton" data-options="iconCls:'iconPdf'" style="width:auto">Xuất phiếu</a>
+            <a  class="easyui-linkbutton" iconCls="excel_icon" onclick="xuatphieuxuatkhoexcel()"  >Xuất phiếu Excel</a>
+        
+        </div>
+
+        <!--dialog chuyển kho đại lý-->
+        <div id="qlxk_chuyenkhodl-dlg" closed="true" class="easyui-dialog" title="Chuyển kho đại lý" style="width:440px;height:250px;padding:20px">
+
+            <input   class="easyui-combobox" 
+                prompt="Chọn nhà phân phối, đại lý" 
+                name="cnnvkd-combobox-customer" 
+                id="ck_daily"
+                style="width:350px;margin-top: 20px"
+                data-options="valueField:'id',
+                    textField:'tenTC',
+                    url:'../tochucs/taidulieutochuc?cbx_tochuc'
+            ">
+
+            <input id="ck_daily-ghichu-tpx" 
+                name="ghichu" 
+                labelPosition="top"
+                label="Ghi chú:" 
+                multiline="true"
+                class="easyui-textbox"
+                style="width:350px;height:100px;" 
+                value=""
+            > 
+            <center style="margin-top: 20px">
+                <a href="#" class="easyui-linkbutton"  id="chuyenkhodaily"> Chuyển kho</a> 
+                <a href="#" class="easyui-linkbutton"  onclick="$('#qlxk_chuyenkhodl-dlg').dialog('close')"> Thoát</a>    
+            </center>
+        </div>
+
+    </center>
+{% endblock %}

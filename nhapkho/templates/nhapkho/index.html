@@ -1,0 +1,568 @@
+{% extends "../trangchu/header.html" %}
+
+{% load static %}
+{% block js %}
+<script type="text/javascript" src="{% static 'js/ajax_quanlynhapkho_mini.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+    <center class="content_center">
+
+        <table id="qlnk-dg" class="easyui-datagrid" title="NHẬP KHO" style="width: 1521px;height: 600px;"
+            pageSize="20"
+            data-options="
+                rownumbers:true, 
+                singleSelect:true, 
+                url:'https://dst.dstsoft.vn/kho/nhapkhos/taidulieunhapkho?nhapkho', 
+                toolbar:'#qlnk-dg-toolbar', 
+                pagination:true"
+        >
+            <thead>
+                <tr>
+                    <th data-options="field:'maPN',width:80, align:'center'" ><b>id</b></th>
+                    <th data-options="field:'maphieunhap',width:140, align:'left'" ><b>Mã phiếu nhập</b></th>
+                    <th data-options="field:'Tennsx',width:200, align:'left'"><b>Tên NCC</b></th>
+                    <th data-options="field:'tongPN',width:135, align:'right',formatter:formatCurrency"><b>Tổng Phiếu(VNĐ)</b></th>
+                    <th data-options="field:'tongthanh',width:135, align:'right',formatter:formatCurrency"><b>Tổng Thanh(VNĐ)</b></th>
+                    <th data-options="field:'noconlai',width:140, align:'right',formatter:formatCurrency"><b>Số nợ còn lại(VNĐ)</b></th>
+                    <th data-options="field:'ngayNK',width:180,align:'center'"><b>Ngày nhập</b></th>
+                    <th data-options="field:'ghichuPN',width:320,align:'left'"><b>Ghi chú</b></th>
+                </tr>
+            </thead>
+
+            <tbody>
+                <tr>
+                    <td>19717</td>
+                    <td>NTKKG240719001</td>
+                    <td>Hàng đổi trả</td>
+                    <td>1550000</td>
+                    <td>1550000</td>
+                    <td>0</td>
+                    <td>2021-11-05 16:55:24</td>
+                </tr>
+            </tbody>
+
+        </table>
+
+        <!--toolbar datagrid Nhập Kho-->
+        <div id="qlnk-dg-toolbar" style="padding:2px 5px;">
+
+            <!-- Tạo phiếu nhập -->
+            <a onclick="capnhatnhapkho()" class="easyui-linkbutton" data-options="iconCls:'icon-add'" style="width:auto;">Tạo phiếu nhập</a>
+        
+            <!-- đồng bộ tồn kho phiếu nhập -->
+            <a onclick="dongbotongtoankho()" class="easyui-linkbutton" data-options="iconCls:'icon-edit'" style="width:auto;">Đồng bộ tồn kho</a>
+        
+            <!-- cập nhật phiếu nhập -->
+            <a onclick="capnhatthongtinkho()" class="easyui-linkbutton" data-options="iconCls:'icon-edit'" style="width:auto;">Cập nhật phiếu nhập</a>
+        
+            <!-- huy phiếu nhập -->
+            <a onclick="huyphieunhap()" class="easyui-linkbutton" data-options="iconCls:'icon-remove'" style="width:auto;">Hủy phiếu nhập</a>
+
+            <span class="easyui-linkbutton" iconCls="icon-tip" onclick="$('#chitietnhapkho_dlg').dialog('open')">Chi tiết Nhập Kho</span>
+            <input class="easyui-combobox" name="language"
+                id="khonhanvienquanlykho" 
+                data-options="
+                    url:'../nhapkhos/taidulieukho?makhonv',
+                    prompt:'Vui lòng chọn kho',
+                    labelWidth:'auto',
+                    valueField:'makho',
+                    textField:'tenkho',
+                    onChange:function(val1,val2){
+                        $search=$('#textsearchkho').textbox('getValue');
+                        if($search==''){
+                            $('#qlnk-dg').datagrid('load',{makhopn:val1});
+                        }
+                        else{
+                            $('#qlnk-dg').datagrid('load',{makhopn:val1,search:$search});
+                        }
+                    }" 
+                style="width:200px;" 
+            >
+
+            <input class="easyui-combobox" prompt="Chọn nhà cung cấp" name="manguonCC"
+                id="nhancungcap" 
+                style="width:220px;" 
+                data-options="
+                    valueField:'Mansx',
+                    textField:'Tennsx',
+                    url: '../nhapkhos/taidulieunhapkho?nhacungcap',
+                    onChange: function(newval,oldval){
+                        $('#qlnk-dg').datagrid('load',{timkiemcongnoncc:newval});
+                    }"
+            >  
+            
+            Từ Ngày<input type="text" id="qlnk-tungay-datebox" 
+            class="easyui-datebox" data-options="formatter:myformatter,parser:myparser,panelHeight:300" >
+            Đến Ngày<input type="text" id="qlnk-denngay-datebox" 
+            class="easyui-datebox" data-options="formatter:myformatter,parser:myparser,panelHeight:300">
+
+            <a class="easyui-linkbutton" data-options="iconCls:'icon-search'" style="width:auto" onclick="
+                $makho=$('#khonhanvienquanlykho').combobox('getValue')
+                $mancc=$('#nhancungcap').combobox('getValue')
+                $loai='timkethoppn'
+                $bien={makho:$makho,mancc:$mancc,timkiemkethop:$loai}
+                timkiemkethop('qlnk-tungay-datebox','qlnk-denngay-datebox','qlnk-dg',$bien)">
+                Tìm kiếm
+            </a>
+
+            <input class="easyui-textbox" id="textsearchkho" data-options="prompt:'mã phiếu, mã SP, tên nhà cung cấp...',
+                onChange:function(val1,val2){
+                    $searchtext=$('#khonhanvienquanlykho').combobox('getValue');
+                    if($searchtext==''){
+                        $('#qlnk-dg').datagrid('load',{timkiem:val1})
+                    }
+                    else{
+                        $('#qlnk-dg').datagrid('load',{makhopn:$searchtext,search:val1});
+                    }
+                }"
+                style="width:300px;"
+            >
+
+            <a  class="easyui-linkbutton" iconCls="iconPdf" onclick="xuatphieunhapkhopdf()"  >Xuất phiếu nhập kho</a>
+            <a  class="easyui-linkbutton" iconCls="excel_icon" onclick="xuatphieunhapkhoexcel()"  >Xuất phiếu nhập kho</a>
+            
+            <a href="#" class="easyui-linkbutton" iconCls="excel_icon" style="width:auto" onclick="
+                $makho=$('#khonhanvienquanlykho').combobox('getValue')
+                $mancc=$('#nhancungcap').combobox('getValue')
+                $bien=[$makho,$mancc]
+                xuatfile('qlnk-tungay-datebox','qlnk-denngay-datebox','excel_spnhapkho',$bien)">
+                F1_SP nhập kho
+            </a>
+
+            <a href="#" class="easyui-linkbutton" iconCls="excel_icon" style="width:auto" onclick="
+                $makho=$('#khonhanvienquanlykho').combobox('getValue')
+                $mancc=$('#nhancungcap').combobox('getValue')
+                $bien=[$makho,$mancc]
+                xuatfile('qlnk-tungay-datebox','qlnk-denngay-datebox','excel_chitietnhapkho',$bien)">
+                F3_Chi tiết nhập kho
+            </a>
+
+            <a href="#" class="easyui-linkbutton" iconCls="excel_icon" style="width:auto" onclick="
+                $makho=$('#khonhanvienquanlykho').combobox('getValue')
+                $mancc=$('#nhancungcap').combobox('getValue')
+                $bien=[$makho,$mancc]
+                xuatfile('qlnk-tungay-datebox','qlnk-denngay-datebox','excel_dsnhapkho',$bien)">
+                F4_DS phiếu nhập
+            </a>
+
+            <a  class="easyui-linkbutton" iconCls="icon-reload" onclick="$('#qlnk-dg').datagrid('load',{load:''})">Tải lại</a>
+
+        </div>
+
+        <!--dialog tạo phiếu nhập-->
+        <div id="qlnk-phieunhap-dlg" class="easyui-dialog" title="TẠO PHIẾU NHẬP" data-options="" closed="true" modal="true" style="width:1100px;height: 90%;padding:10px">
+
+            <h2 style="text-align: center;color: #2263BE;">PHIẾU NHẬP</h2>
+            <form id="qlnk-frm_phieunhap">
+                {% csrf_token %}
+                <center>
+                    <table style=" width: 90%;height: 50%">
+                        <tr>
+                            <td>
+                                <fieldset style="width:600px;  ">
+                                    <legend style="text-align: center;color: #2263BE;">Thông tin</legend>
+                                    <table>
+
+                                        <tr>
+                                            <td>
+                                                <select id="qlnk-phieunhap-nguoncap-cbb" class="easyui-combogrid" 
+                                                    style="width:200px;margin-top: 20px;height: 50px;" name="manguonCC" labelWidth="150px" 
+                                                    data-options="
+                                                        required:true,
+                                                        panelWidth: 600,
+                                                        idField: 'Mansx',
+                                                        textField: 'Tennsx',
+                                                        url: '../nhapkhos/taidulieunhapkho?nhacungcap',
+                                                        columns: [[
+                                                            {field:'Tennsx',align:'left',title:'<b>Tên NCC</b>',width:80},
+                                                            {field:'Sdt',align:'center',title:'<b>Số điện thoại</b>',width:120},
+                                                            {field:'diachi',align:'left',title:'<b>Địa chỉ</b>',width:80,align:'left'},
+                                                        ]],
+                                                        fitColumns: true,
+                                                        label: 'Chọn nguồn cấp:',
+                                                        labelPosition: 'top',"
+                                                >                                      
+                                                </select>
+                                            </td>
+
+                                            <td>
+                                                <input id="qlnk-ngaythanhtieptheo-datebox"
+                                                    label="Ngày thanh tiếp theo:" 
+                                                    name="ngaytratieptheo"
+                                                    labelPosition="top"  
+                                                    class="easyui-datebox" 
+                                                    data-options="formatter:myformatter,parser:myparser" 
+                                                    style="width:200px; height:50px"
+                                                >
+                                            </td>
+
+                                            <td>
+                                                <input  id="qlnk-tongphieunhap-nbb" 
+                                                    class="easyui-numberbox" 
+                                                    label="Tổng phiếu nhập:" 
+                                                    name="tongPN"
+                                                    data-options="groupSeparator:'.',min:0,suffix:'VND',"
+                                                    labelPosition="top"
+                                                    readonly 
+                                                    style="width:200px;height:50px;" 
+                                                    value="" 
+                                                >
+                                            </td>
+
+                                            <td>
+                                                <input  id="qlnk-tongtratruoc-nbb" 
+                                                    labelPosition="top"
+                                                    label="Tổng trả trước:"
+                                                    name="tratruoc" 
+                                                    class="easyui-numberbox"
+                                                    data-options="groupSeparator:'.',min:0,suffix:'VND', required:true,
+                                                        onChange:function(val1,val2){
+                                                            $tongthanh=$('#qlnk-tongphieunhap-nbb').numberbox('getValue')
+                                                            if(parseInt($tongthanh) < parseInt(val1)){
+                                                                thongbao('Tổng thanh phải nhỏ hơn tổng phiếu');
+                                                                $('#qlnk-tongtratruoc-nbb').numberbox('setValue',$tongthanh);
+                                                            }
+                                                        }"
+                                                    style="width:200px;height:50px;" 
+                                                    value="<?php echo $tongphieu; ?>"
+                                                >
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <td>
+                                                <select required="true" name="" 
+                                                    id="qlnk-hinhthucthanh-cbb"
+                                                    label="Hình thức thanh toán:" 
+                                                    labelPosition="top"
+                                                    name="hinhthucthanh" 
+                                                    class="easyui-combobox" 
+                                                    style="width:200px;height:50px; " 
+                                                    data-options="editable:false,"
+                                                >
+                                                    <option value="Tiền Mặt">Tiền Mặt</option>
+                                                    <option value="Đổi Trả">Đổi Trả</option>
+                                                    <option value="Chuyển Khoản">Chuyển Khoản</option>
+                                                    <option value="Khác">Khác</option>
+                                                </select>
+                                            </td>
+
+                                            <td>
+                                                <input id="qlnk-stk-txtb"
+                                                    label="Số tài khoản:" 
+                                                    labelPosition="top"  
+                                                    class="easyui-textbox" 
+                                                    style="width:200px;height: 50px;"
+                                                    disabled="true" required="true"
+                                                >
+                                            </td> 
+
+                                            <td colspan="2">
+                                                <input id="qlnk-ghichu-txtb" 
+                                                    labelPosition="top"
+                                                    label="Ghi chú:" 
+                                                    class="easyui-textbox"
+                                                    style="width:400px;height:50px;" 
+                                                    value=""
+                                                > 
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <td colspan="5">
+                                                <a class="easyui-linkbutton" 
+                                                    data-options="
+                                                        iconAlign:'top',
+                                                        onClick:function(){
+                                                            $('#qlnk-phieunhap-dlg').dialog('close');
+                                                        }" 
+                                                    style="float: right;
+                                                    margin-right: 30px;
+                                                    margin-right: 35%;
+                                                    width: 100px;">
+                                                    Hủy phiếu
+                                                </a>
+
+                                                <a class="easyui-linkbutton" 
+                                                    id="capnhatnhapkho" 
+                                                    data-options="size:'small',iconAlign:'top'" 
+                                                    style="width: 100px;
+                                                    margin-right: 20px;
+                                                    float: right;" onclick="capNhatNhapKho()">
+                                                    Lưu thông tin 
+                                                </a>
+
+                                                <a class="easyui-linkbutton"
+                                                    id="capnhatthongtinnhapKho" 
+                                                    data-options="
+                                                    size:'small',
+                                                    iconAlign:'top'" 
+                                                    style="width: 200px;
+                                                    margin-right: 20px;
+                                                    float: right;">
+                                                    Cập nhật thông tin 
+                                                </a>
+                                            </td> 
+                                        </tr>   
+
+                                    </table>
+                                </fieldset>
+                            </td>
+                        </tr>
+                    </table>
+                </center> 
+            </form>
+
+
+            <br>
+            <!-- danh sách sp nhập datagrid -->
+            <table id="qlnk-dsspnhap-dg" class="easyui-datagrid" title="Danh sách sản phẩm nhập" 
+                style=" height:auto;width:99%;" fitColumns="true" pagination="true" showFooter="true"
+                rownumbers="true"   
+                data-options=" 
+                    fitColumns:'true',
+                    singleSelect: true,
+                    toolbar:'#qlnk-dsspnhap-dg-toolbar',
+                    url:'../nhapkhos/taidulieunhapkho?nhapkho&maPN=<?php echo $mapn ?>',"
+            >
+                <thead>
+                    <tr>
+                        <th data-options="field:'tensp' ,width:'300px' "><b>Tên sản phẩm</b></th>
+                        <th data-options="field:'soLX',align:'center',editor:'numberbox'"><b>Số lượng</b></th>
+                        <th data-options="field:'dongia',align:'right',formatter:formatCurrency"><b>Đơn giá(VNĐ)</b></th>
+
+                        <th data-options="field:'chietkhauPN',
+                            align:'center',
+                            editor:{type:'numberspinner',options:{groupSeparator:',' ,suffix:'%'}}"
+                        >
+                            <b>CK(%)</b>
+                        </th> 
+
+                        <th data-options="field:'thanhtien',
+                            width:'100px',
+                            align:'right',
+                            formatter:formatCurrency"
+                        >
+                            <b>Thành tiền (VNĐ)</b>
+                        </th>
+
+                        <th data-options="  field:'solo',align:'center'"  width="50px;"><b>Số lô</b></th> 
+
+                        <th data-options="  field:'ngayhethangsudung',align:'center'" width="80px;"><b>Hạn dùng</b></th> 
+
+                        <th data-options="  field:'tenkho',align:'center'" width="100px;"><b>Kho hàng</b></th>
+
+                    </tr>
+                </thead>
+            </table> 
+
+
+            <!--toolbar dialog Tạo phiếu nhập-->
+            <form id="formthemsanpham">
+                {% csrf_token %}
+                <div id="qlnk-dsspnhap-dg-toolbar" style="height:auto">
+
+                    <label>Kho:</label>
+                    <input class="easyui-combobox" name="language"
+                        id="khonhanvienquanlykho_sp" 
+                        data-options="
+                            url:'../nhapkhos/taidulieukho?makhonv',
+                            prompt:'Vui lòng chọn kho',
+                            labelWidth:'auto',
+                            valueField:'makho',
+                            textField:'tenkho',
+                            onChange:function(val1,val2){
+                                var g = $('#qlnk-dsspnhap-sanpham-cbgrid').combogrid('grid');   // get datagrid object
+                                g.datagrid('load',{makho:val1});
+                            }" 
+                        style="width:300px;" 
+                    >
+
+                    <label>Sản phẩm</label>
+                    <select id="qlnk-dsspnhap-sanpham-cbgrid" class="easyui-combogrid" fitColumns="true"  labelPosition="top" style="width:300px;"  
+                        data-options="panelWidth:700,
+                            idField:'Masanpham',
+                            textField:'tensp',
+                            url:'../sanphams/combogrid_sp?spkhonv',
+                            prompt:'Vui lòng chọn sản phẩm',
+                            pagination:'true',
+                            rownumbers:'true',
+                            columns:[[
+                                {field:'MaSP',title:'<b>Mã sản phẩm</b>',width:50},
+                                {field:'tensp',title:'<b>Tên sản phẩm</b>',width:200},
+                                {field:'soluongton',title:'<b>Số lượng hiện tại</b>',width:50,align:'right'},
+                                {field:'gia_ban',title:'<b>Giá Bán (VNĐ)</b>',width:50,formatter: function(value,row,index){
+                                    if(value > 0){
+                                        return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.') }
+                                    else{
+                                        return 0 
+                                    }
+                                }},
+                                {field:'gia_nhap',title:'<b>Giá nhập (VNĐ)</b>',width:50,formatter: function(value,row,index){
+                                    if(value > 0){
+                                        return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.') }
+                                    else{
+                                        return 0 
+                                    }
+                                }}
+                            ]],
+                            onChange:function(val1,val2){
+                                $makho=$('#khonhanvienquanlykho_sp').combobox('getValue');
+                                var g = $('#qlnk-dsspnhap-sanpham-cbgrid').combogrid('grid');   // get datagrid object
+                                g.datagrid('load',{q:val1,makho:$makho});
+                            }"
+                    >
+                    </select>
+
+                    <label> Số Lượng</label>
+                    <input 
+                        style="width:80px" 
+                        id="qlnk-dsspnhap-soluong-number"  
+                        name="sl_them"  
+                        type="number"  
+                        class="easyui-numberspinner"
+                        data-options="min:1,required:true,value:'1',"
+                    >
+
+                    <span >
+                        <label>Chiết khấu:</label> 
+                        <input style="width:80px"   
+                            id="qlnk-dsspnhap-chietkhau-number" value="0"  
+                            name="chietkhau_them" 
+                            class="easyui-numberspinner"   
+                            data-options="groupSeparator:'.',suffix:'%',min:0,max:100"
+                        >
+                    </span>
+
+                    <br>
+                    Hạn dùng<input type="text" id="qlnk-dsspnhap-handung-datebox" class="easyui-datebox" required="required" data-options="formatter:myformatter,parser:myparser,panelHeight:300">
+                    Vị trí <input type="text" id="qlnk-dsspnhap-vitridat-txtb"  class="easyui-textbox" style="width:250px;" >
+                    Số lô <input type="text" id="qlnk-solo" required="required" class="easyui-textbox" style="width:100px;" >
+                    Mã QR <input type="text" disabled="true"  id="qlnk-qr" class="easyui-textbox" style="width:100px;" >
+
+                    <a href="javascript:void(0)" 
+                        class="easyui-linkbutton" 
+                        data-options="iconCls:'icon-add'"
+                        id="themspqlnk" 
+                        onclick="themSPQLNK()"
+                    >
+                        Lưu sản phẩm
+                    </a>
+
+                    <a href="javascript:void(0)" 
+                        class="easyui-linkbutton" 
+                        data-options="iconCls:'icon-add'"
+                        id="themspnk" 
+                        onclick="themSPNK()"
+                    >
+                        Lưu sản phẩm 1
+                    </a>
+
+                    <a href="javascript:void(0)" 
+                        class="easyui-linkbutton" 
+                        data-options="iconCls:'icon-remove'" 
+                        onclick="xoaSPQLNK()"
+                    >
+                        Xóa
+                    </a>
+
+                </div>
+            </form>
+
+        </div>
+
+        <!--dialog chi tiêt phieu nhập-->
+        <div id="chitietnhapkho_dlg" class="easyui-dialog" title="Thông tin chi tiết nhập kho" data-options="" closed="true" style="width:100%;height: 90%;padding:10px;">
+            <br>
+            <table id="chitietnhapkho_dg" class="easyui-datagrid" title="Danh sách phiếu nhập kho ở tháng hiện tại"
+                style=" width:99%;" 
+                fitColumns="true" showFooter="true" pagination="true"
+                rownumbers="true"  
+                showFooter="true"
+                url="taidulieukho?chitietpn" 
+                data-options=" 
+                    fitColumns:true,
+                    toolbar:'#toolbar_chitietnhapkho',
+                    singleSelect: true"
+                pagesize="20"
+            >
+                <thead>
+                    <tr>
+                        <th data-options="field:'MaSP',width:60"><b>Mã sản phẩm</b></th>
+                        <th data-options="field:'tensp',width:170"><b>Tên sản phẩm</b></th>
+                        <th data-options="field:'maphieunhap',width:80"><b>Mã phiếu nhập</b></th>
+                        <th data-options="field:'Tennsx',width:170"><b>Nhà cung cấp</b></th>
+                        <th data-options="field:'ngaynhapxuat',width:80"><b>Ngày nhập</b></th>
+                        <th data-options="field:'gianhap',width:70,align:'right'"><b>Đơn giá</b></th>
+                        <th data-options="field:'soluongnhap',width:40"><b>Số lượng</b></th>
+                        <th data-options="field:'chietkhau',width:60"><b>Chiếc khấu(%)</b></th>
+                        <th data-options="field:'sotien',width:80,formatter:formatCurrency,align:'right'"><b>Số Tiền(VNĐ)</b></th> 
+                        <th data-options="field:'tenkho',width:80"><b>Tên Kho</b></th>    
+                    </tr>
+                </thead>
+            </table> 
+
+            <!--toolbar chi tiết phiếu nhap-->
+            <div id="toolbar_chitietnhapkho">
+
+                <input class="easyui-combobox"  id="nhomsp" 
+                    data-options="prompt:'Chọn nhãn hàng...',
+                        url:'../sanphams/combobox_nhomsp',
+                        valueField: 'manhom',
+                        textField: 'tennhom'" 
+                    style="width: 190px;height:30px;"
+                />
+
+                <input class="easyui-combobox" prompt="Lựa chọn sản phẩm"  
+                    id="maspctnk"
+                    style="width:350px;" 
+                    data-options="valueField:'Masanpham',
+                        textField:'tensp', 
+                        url:'../sanphams/taiDuLieu?chitietspcb',"
+                >
+
+                <input class="easyui-combobox" prompt="Chọn nhà cung cấp" name="congnokh-combobox-customer"
+                    id="chitiettheoncc" 
+                    style="width:250px;" 
+                    data-options="valueField:'Mansx',
+                        textField:'Tennsx',
+                        url: '../nhapkhos/taidulieunhapkho?nhacungcap',"
+                >
+
+                <label>Kho:</label>
+                <input class="easyui-combobox" name="language"
+                    id="chitiettheokho" 
+                    data-options="url:'../nhapkhos/taidulieukho?makhonv',
+                        prompt:'Vui lòng chọn kho',
+                        labelWidth:'auto',
+                        valueField:'makho',
+                        textField:'tenkho',"
+                    style="width:200px;" 
+                >
+
+                Từ: <input id="db-CTPN-from" class="easyui-datebox" data-options="formatter:myformatter,parser:myparser,panelHeight:300" style="width:130px;">
+                đến: <input id="db-CTPN-to" class="easyui-datebox" data-options="formatter:myformatter,parser:myparser,panelHeight:300" style="width:130px;">
+
+                <!--Tìm kiếm kết hợp sản phẩm, khách hàng, ma kho -->
+                <a class="easyui-linkbutton" data-options="iconCls:'icon-search'" style="width:auto" onclick="
+                    $makho=$('#chitiettheokho').combobox('getValue')
+                    $mancc=$('#chitiettheoncc').combobox('getValue')
+                    $masp=$('#maspctnk').combobox('getValue')
+                    $manhom=$('#nhomsp').combobox('getValue')
+                    $loai='timkethopchitietpn'
+                    $bien={makho:$makho,mancc:$mancc,masp:$masp,loai:$loai,manhom:$manhom}
+                    timkiemkethop('db-CTPN-from','db-CTPN-to','chitietnhapkho_dg',$bien)">
+                    Tìm kiếm
+                </a>           
+
+                <a class="easyui-linkbutton" onclick="xuatdanhsachctphieunhaptheotimkiem()"   iconCls="excel_icon" >F6_Chi tiết sp nhap kho</a>
+                <a class="easyui-linkbutton" onclick="xuatdanhsachctphieunhaptheotimkiemxinghiep()"   iconCls="excel_icon" >F7_Chi tiết sp nhap kho</a>
+
+            </div>
+
+        </div>
+
+    </center>
+{% endblock %}
+    

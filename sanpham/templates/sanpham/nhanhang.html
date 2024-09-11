@@ -1,0 +1,116 @@
+{% extends "../trangchu/header.html" %}
+
+{% load static %}
+{% block js %}
+<script type="text/javascript" src="{% static 'js/ajax_sanpham.js' %}"></script>
+
+    <script>
+        $(function(){
+            $('#dg_nhom').datagrid(
+                {
+                url: 'http://127.0.0.1:8000/sanpham/list_nhomsanpham/',  // URL để gửi yêu cầu AJAX
+                method: 'get',
+                onLoadSuccess: function(data) {
+                    console.log('Data loaded successfully:', data);
+                },
+                onLoadError: function() {
+                    console.log('Error loading data');
+                }
+            }
+            ).datagrid('clientPaging');
+        });
+    </script>
+
+
+{% endblock %}
+
+{% block content %}
+    <center class="content_center">
+
+        <table 
+            style="width: 1521px;height: 600px; margin: auto; border: 2px;"
+            id="dg_nhom" 
+            class="easyui-datagrid" 
+            title="Danh sách nhóm sản phẩm/ nhãn hàng/ nhà sản xuất" 
+            iconCls='icon-save'  
+            toolbar="#toolbar_nhom" 
+            pagination="true"
+            rownumbers="true"  
+            singleSelect="true" 
+            fitColumns="true" 
+        >
+            <thead>
+                <tr>
+                    <th data-options="field:'manhom'" width="150px;" ><b>Mã nhãn hàng</b></th>
+                    <th data-options="field:'tennhom'" width="150px;" ><b>Tên nhãn hàng</b></th>
+                    <th data-options="field:'mota'" width="150px;" ><b>Mô tả</b></th>
+                </tr>
+            </thead>
+
+
+        </table>
+
+        <div id="toolbar_nhom">
+            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-add"   onclick="themSP_nhom()">Thêm nhóm </a>
+            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit"   onclick="suasp_nhom()">Chỉnh sửa</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-remove"   onclick="Xoasp_nhom()">Xóa nhóm</a>
+            <a href="{% url 'sanpham:index' %}" class="easyui-linkbutton">Sản phẩm</a>
+        </div>
+
+        <!-- them moi -->
+        <div id="dlg" class="easyui-dialog" style="width:500px;height:270px;padding:10px 20px" closed="true" buttons="#dlg-buttons">
+            <form id="ff" action="" method="post" enctype="multipart/form-data">
+                <table>
+
+                    <tr>
+                        <td>Tên nhãn hàng:</td>
+                        <td><input name="masp" style="width:260px;" data-options="required:true" class="f1 easyui-textbox"></input></td>
+                    </tr>
+
+                    <tr>
+                        <td>mô tả:</td>
+                        <td><textarea name="mota" id="w3review" data-options="required:true" required="required" placeholder="Mô tả sản phẩm..." name="w3review" rows="4" cols="33"></textarea></td>
+                    </tr>
+                    
+                </table>
+            </form>
+        </div>
+        <div id="dlg-buttons">
+            <a href="javascript:void(0)" class="easyui-linkbutton c6" iconCls="icon-ok" onclick="saveUser()" style="width:90px">Lưu</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#dlg').dialog('close')" style="width:90px">Hủy</a>
+        </div>
+
+        <!-- cap nhat -->
+        <div 
+            style="width:500px;height:300px;padding:10px 20px"
+            id="dlg_nhom" 
+            class="easyui-dialog" 
+            style="width:500px;height:auto;padding:10px 20px; "  
+            closed="true" 
+            buttons="#dlg-buttons_nhom"
+        >
+            <form id="fm_nhom" method="post">
+                {% csrf_token %}
+                <table>
+
+                    <tr>
+                        <td>Tên nhãn hàng:</td>
+                        <td><input class="easyui-validatebox tb" name="ten_nhom" id="ten_nhom" style="width: 276.4px;height: 30px; border-radius:5px;border:1px solid #95b8e7; margin-top: 5px;padding-left: 1px"></input></td>
+                    </tr>
+
+                    <tr>
+                        <td>mô tả:</td>
+                        <td><textarea name="mt_nhom" class="easyui-validatebox tb" id="mt_nhom" autocomplete="off" placeholder="Mô tả nhóm" style="margin: 0px; height: 50.4px; width: 276.4px;border-radius:5px;border:1px solid #95b8e7; margin-top: 15px;"></textarea></td>
+                    </tr>
+                    
+                </table>
+            </form>
+        </div>
+        <div id="dlg-buttons_nhom">
+            <a href="#" class="easyui-linkbutton" iconCls="icon-ok" id="luuSP_nhom">Lưu</a>
+            <a href="#" class="easyui-linkbutton" iconCls="icon-ok"  id="capnhatSP_nhom">Cập Nhật</a>
+            <a href="#" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#dlg_nhom').dialog('close')">Hủy</a>
+        </div>
+
+    </center>
+{% endblock %}

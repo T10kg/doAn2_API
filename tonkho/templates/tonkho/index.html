@@ -1,0 +1,161 @@
+{% extends "../trangchu/header.html" %}
+
+{% load static %}
+{% block js %}
+<script type="text/javascript" src="{% static 'js/ajax_tonkho_mini.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+  <center class="content_center">
+    
+    <table id="dg_tk" class="easyui-datagrid" title="Danh sách sản phẩm trong kho tính đến hiện tại"
+      style="width: 1521px;height: 600px; margin: auto; border: 2px;" 
+      sortName="tensp"   
+      toolbar="#toolbar_tk" 
+      pagination="true"
+      rownumbers="true"  singleSelect="true" 
+      collapsible="true" sortOrder="asc"  
+      remoteSort="fasle" iconCls='icon-save'
+      fitColumns="true" 
+      pageSize="20"
+      data-options="url:'{% url 'tonkho:api_tonkho' %}', method:'post'"
+    >
+      <thead>
+          <tr>
+          
+            <th data-options="field:'masanpham'"  width="50px;"><b>Mã SP</b></th>
+            <th data-options="field:'tenkho'" width="80px;" sortable="true"><b>Kho hàng</b></th>
+            <th data-options="field:'tensp'" sortable="true" width="150px; "><b>Tên SP</b></th>
+            <th data-options="field:'ngayhethangsudung'" sortable="true" width="50px; "><b>Hết hạn</b></th>
+            <th data-options="field:'solo'" sortable="true" width="50px; "><b>Số lô</b></th>
+
+            <th width="40px; " data-options="field:'tondauky',align:'center',
+              formatter: function(value,row,index){
+                if(value > 0){
+                  return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',') }
+                else{
+                  return value 
+                }
+              }"
+            ><b>Tồn đầu kỳ</b></th>
+
+            <th width="40px; " data-options="field:'soluongnhap_',align:'center',
+              formatter: function(value,row,index){
+                if(value > 0){
+                return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',') }
+                else{
+                  return value ;
+                }
+              }"
+            ><b>SL nhập</b></th>
+          
+            <th width="40px; " data-options="field:'soluongxuat_',align:'center',
+              formatter: function(value,row,index){
+                if(value > 0){
+                  return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',') }
+                else{
+                  return value ;
+                }
+              }"
+            ><b>SL xuất</b></th>
+
+            <th width="40px; " data-options="field:'soluongtontaithoidiem',align:'center',
+              formatter: function(value,row,index){
+                if(value > 0){
+                  return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',') }
+                else{
+                  return value 
+                }
+              }"
+            ><b>Tồn hiện tại</b></th>
+
+            <th width="60px; " data-options="field:'tonthucte',align:'center',
+              formatter: function(value,row,index){
+                if(value > 0){
+                  return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',') }
+                else{
+                  return value 
+                }
+              }"
+            ><b>Tồn cuối kỳ</b></th>
+
+            <th width="50px; "  data-options="field:'gia_ban',align:'right',
+              formatter: function(value,row,index){
+                return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')
+              }"
+            ><b>Giá hiện tại</b></th>
+
+            <th width="50px; " data-options="field:'thanhtien',align:'right',
+              formatter: function(value,row,index){
+                return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')
+              }"  
+            ><b>Thành tiền</b> </th>
+            
+          </tr>
+      </thead>
+    </table>
+
+    <div id="toolbar_tk">
+        
+        <input class="easyui-combobox"  id="tenkho" 
+            data-options="prompt:'Chọn kho hàng...',valueField: 'makho',textField: 'tenkho',url:'get_data.php'"
+            style="width: 190px;height:30px;"
+        />
+
+        <input class="easyui-combobox"  id="nhomsp" 
+            data-options="prompt:'Chọn nhãn hàng...',
+                valueField: 'manhom',
+                textField: 'tennhom'
+                , 
+                onChange:function(val1,val2){
+                  $makho=$('#tenkho').combobox('getValue');
+                  if($makho==''){
+                    $('#dg_tk').datagrid('load',{manhomsp:val1});
+                  }
+                  else{
+                    $('#dg_tk').datagrid('load',{manhomsp:val1,makhotimsp:$makho});
+                  } 
+                  
+                }" 
+            style="width: 190px;height:30px;"
+        />
+
+        <input class="easyui-combobox" prompt="Lựa chọn sản phẩm"  
+            id="masptk"
+            style="width:300px;" 
+            data-options="valueField:'Masanpham',textField:'tensp', 
+              onChange:function(val1,val2){
+                  $makho=$('#tenkho').combobox('getValue');
+                  if($makho==''){
+                    $('#dg_tk').datagrid('load',{timkiemtksp:val1});
+                  }
+                  else{
+                    $('#dg_tk').datagrid('load',{timkiemtksp:val1,makhotksp:$makho});
+                  }    
+              }"
+        >
+
+        Từ Ngày<input type="text" id="tk-tungay-datebox" style="width: 168.4px;" class="easyui-datebox" data-options="formatter:myformatter,parser:myparser,panelHeight:300">
+        Đến Ngày<input type="text" id="tk-denngay-datebox" style="width: 168.4px;" class="easyui-datebox" data-options="formatter:myformatter,parser:myparser,panelHeight:300">
+
+        <a class="easyui-linkbutton" data-options="iconCls:'icon-search'" style="width:auto" onclick="
+            $makho=$('#tenkho').combobox('getValue')
+            $masx=$('#nhomsp').combobox('getValue')
+            $masp=$('#masptk').combobox('getValue')
+            $bien={timkiemtonkhotheothoigian:1,makho:$makho,masx:$masx,masp:$masp}
+            timkiemtungaydenngay('tk-tungay-datebox','tk-denngay-datebox','dg_tk',$bien)" 
+        >Tìm kiếm</a>
+
+        <a class="easyui-linkbutton" style="width:auto;" iconCls="icon-list" target="_blank" href="{% url 'tonkho:phieuxuatloidongbo' %}" >Số phiếu xuất lỗi tồn kho</a> 
+
+        <a href="#" id="xuatfile_exceltheongay_theosp" iconcls="excel_icon" onclick="xuattonkhotheotimkiem()"  style="height:30px;" class="easyui-linkbutton" >Xuất tồn kho</a> 
+
+        <a href="#" style="height: 30px" class="easyui-linkbutton" onclick="$('#dg_tk').datagrid('load',{HH:''});">DS sản phẩm hết hàng</a>
+        <a href="#" style="height: 30px" class="easyui-linkbutton" data-options="iconCls:'icon-reload'" onclick="$('#dg_tk').datagrid('load',{});">Tải lại</a>
+
+    </div>
+
+    <div id="thongbao_xk"></div>
+
+  </center>
+{% endblock %}

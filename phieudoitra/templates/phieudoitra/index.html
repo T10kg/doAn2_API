@@ -1,0 +1,415 @@
+{% extends "../trangchu/header.html" %}
+
+{% load static %}
+{% block js %}
+<script type="text/javascript" src="{% static 'js/ajax_doitrahang_mini.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+    <center class="content_center">
+
+        <table id="qlxk-dg" class="easyui-datagrid" title="Quản lý đổi trả hàng" style="width: 1521px;height: 600px;"
+            pageSize="20"
+            data-options="
+                rownumbers:true, 
+                singleSelect:true, 
+                url:'../sanphams/taiDuLieuphieuxuat?ql', 
+                toolbar:'#qlxk-tb-dg', 
+                pagination:true,"
+        >
+            <thead>
+                <tr>
+                    <th data-options="field:'id',width:50, align:'center'" ><b>idPX</b></th>
+                    <th data-options="field:'maPhieuxuat',width:120" ><b>Mã phiếu xuất</b></th>
+                    <th data-options="field:'tenNVKD',width:160" ><b>NV kinh doanh</b></th>
+                    <th data-options="field:'Ten',width:170"><b>Tên khách hàng</b></th>
+                    <th data-options="field:'tongphieuX',width:120, align:'right',formatter:formatCurrency"><b>Tổng Phiếu(VNĐ)</b></th>
+                    <th data-options="field:'tongthanhtoan',width:125, align:'right',formatter:formatCurrency"><b>Tổng Thanh(VNĐ)</b></th>
+                    <th data-options="field:'noconlai',width:132, align:'right',formatter:formatCurrency"><b>Số nợ còn lại(VNĐ)</b></th>
+                    <th data-options="field:'ngayxuat',width:160,align:'center'"><b>Ngày xuất</b></th>
+
+                    <th data-options="field:'tinhtrang',width:170,align:'center',
+                        formatter:function(value,row,index){
+                            if(value=='0'){
+                                return 'Chưa xuất phiếu'
+                            } else{
+                                return 'Đã xuất phiếu'
+                            }
+                        }">
+                        <b>Tình trạng</b>
+                    </th>
+
+                    <th data-options="field:'ghichu',width:200,align:'left'"><b>Ghi chú</b></th>
+                    
+                </tr>
+            </thead>
+
+            <tbody>
+                <tr>
+                    <td>48968</td>
+                    <td>XKKG211105002</td>
+                    <td>Phòng IT</td>
+                    <td>khách hàng test app</td>
+                    <td>1550000</td>
+                    <td>0</td>
+                    <td>1550000</td>
+                    <td>2021-11-05 16:55:24</td>
+                    <td>1</td>
+                    <td></td>
+                </tr>
+            </tbody>
+
+        </table>
+
+        <!--toolbar of the datagrid SẢN PHẨM-->
+        <div id="qlxk-tb-dg" style="padding:2px 5px;">
+
+            <!-- Tạo phiếu xuất -->
+            <a onclick="taophieudoitra()" class="easyui-linkbutton" data-options="iconCls:'icon-add'" style="width:auto">Tạo phiếu đổi trả</a>
+        
+            
+            <input id="textsearchkho" class="easyui-textbox" data-options="prompt:'maPX, MaQR',
+                onChange:function(val1,val2){
+                    $('#qlxk-dg').datagrid('load',{timkiemphieuxuat:val1})
+                }" 
+                style="width:160px;"
+            >
+
+            Từ: <input id="db-QLXK-from" class="easyui-datebox" data-options="formatter:myformatter,parser:myparser,panelHeight:300" style="width:130px">
+            đến: <input id="db-QLXK-to" class="easyui-datebox" data-options="formatter:myformatter,parser:myparser,panelHeight:300" style="width:130px">
+
+            <a class="easyui-linkbutton" data-options="iconCls:'icon-search'" style="width:auto" onclick="timkiemtungaydenngay('db-QLXK-from','db-QLXK-to','qlxk-dg')">Tìm kiếm</a>
+            <a  iconCls="icon-list" onclick="$('#dg-phieudoitrahang').dialog('open')" class="easyui-linkbutton">Danh sách phiếu đổi trả</a>
+
+            <input class="easyui-combobox" prompt="Lựa chọn khách hàng" name="congnokh-combobox-customer" 
+                style="width:300px;" 
+                data-options="valueField:'MaKH',
+                textField:'Ten',
+                url:'../khachhangs/dskh',
+                onChange: function(newval,oldval){
+                    $('#qlxk-dg').datagrid('load',{timkiemphieuxuatkh:newval});
+                }"
+            >
+
+            <input class="easyui-combobox" prompt="Chọn nhân viên kinh doanh" name="congnokh-combobox-customer" 
+                style="width:300px;"
+                data-options="valueField:'maNV',
+                    textField:'tenNV',
+                    url:'../nhanviens/dsNV?danhsachnvpx',
+                    onChange: function(newval,oldval){
+                        $('#qlxk-dg').datagrid('load',{timkiemphieuxuatnvkd:newval});
+                    }"
+            > 
+
+            <label>Kho:</label>
+            <input class="easyui-combobox" name="language"
+                id="khonhanvienquanlykho" 
+                data-options="url:'../nhapkhos/taidulieukho?makhonv',
+                prompt:'Vui lòng chọn kho',
+                labelWidth:'auto',
+                valueField:'makho',
+                textField:'tenkho',
+                onChange:function(val1,val2){
+                    $search=$('#textsearchkho').textbox('getValue');
+                    if($search==''){
+                        $('#qlxk-dg').datagrid('load',{makhopx:val1});
+                    }
+                    else{
+                        $('#qlxk-dg').datagrid('load',{makhopx:val1,search:$search});
+                    }
+                }" 
+                style="width:300px;" 
+            >
+
+        </div>
+
+        <!--dialog tạo phiếu xuất-->
+        <div id="dg-doitrahang" class="easyui-dialog" title="Tạo phiếu đổi trả hàng" closed="true"
+            style="width:1400px; height: 90%;padding:10px;">
+
+            <center>
+                <form action="" id="qlxk-frm_phieuxuat">
+                    {% csrf_token %}
+                    <table style=" width: 800px;height: 50%;">
+                        <tr>
+                            <td>
+                                <fieldset style="width:400px; margin-left:140px; ">
+                                    <legend style="text-align: center;color: #2263BE;">Thông tin</legend>
+                                    <table>
+                                        <tr>
+                                            <td colspan="3">
+
+                                                <input id="ghichu-doitrahang" 
+                                                    labelPosition="top"
+                                                    label="Ghi chú:" 
+                                                    class="easyui-textbox"
+                                                    style="width:400px;height:70px;" 
+                                                    value=""
+                                                > 
+
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <label>Trả toàn bộ phiếu xuất</label>
+                                                <input type="checkbox" id="hinhthuctrahang">
+
+                                                <label>Ghi nợ khách hàng </label>
+                                                <input type="checkbox" id="ghinokh">
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td colspan="3">
+
+                                                <a class="easyui-linkbutton" 
+                                                    data-options="size:'large',iconAlign:'top'" 
+                                                    style="float: right;
+                                                    margin-right: 30px;
+                                                    margin-right: 35%;
+                                                    width: 100px; height: 30px;" onclick="huyphieudoitra()" >
+                                                    Hủy phiếu
+                                                </a>
+
+                                                <a class="easyui-linkbutton" 
+                                                    id="luuthongtindoitra" 
+                                                    data-options="size:'large',iconAlign:'top'" 
+                                                    style="width: 100px;
+                                                    margin-right: 20px;
+                                                    float: right; height: 30px;">
+                                                    Lưu thông tin 
+                                                </a>
+                                                
+                                        </tr>                         
+                                    </table>
+                                </fieldset>
+                            </td>
+                        </tr>
+                    </table>
+                </form>
+            </center> 
+
+            <br>
+            <table id="dg-quanLySP_sale-dsspn" class="easyui-datagrid" title="Danh sách sản phẩm đổi trả" 
+                style=" width:1350px; height:auto;" 
+                fitColumns="true" showFooter="true" pagination="true"
+                rownumbers="true"   
+                data-options=" 
+                    fitColumns:true,
+                    singleSelect: true,
+                    toolbar:'#qlxk-tpx-tlb',
+                    url:'../sanphams/combogrid_sp?mapdt=<?php echo $mapdt ;?>'"
+            >
+                <thead>
+                    <tr>
+
+                        <th data-options="field:'tensp' ,width:'250px' "><b>Tên sản phẩm</b></th>
+                        <th data-options="field:'soluong',align:'center',editor:'numberbox',"><b>Số lượng</b></th>
+
+                        <th data-options="field:'gia',
+                            align:'right',
+                            editor:{type:'numberspinner',options:{groupSeparator:'.' ,min:1,suffix:'VND'}}">
+                            <b>Đơn giá(VNĐ)</b>
+                        </th>
+
+                        <th data-options="field:'chietkhau',align:'center',editor:{type:'numberspinner',}"><b>Chiết khấu(%)</b></th> 
+
+                        <th data-options="field:'thanhtien',
+                            width:'100px',
+                            align:'right',
+                            editor:{type:'numberspinner'},">
+                            <b>Thành tiền(VNĐ)</b>
+                        </th> 
+
+                        <th data-options="field:'soqr',
+                            width:'50px',
+                            align:'center',
+                            editor:{type:'numberspinner',}">
+                            <b>Số qr</b>
+                        </th> 
+
+                    </tr>
+                </thead>
+            </table> 
+
+        </div>
+
+        <!--dialog doi tra hang-->
+        <div id="dg-phieudoitrahang" class="easyui-dialog" title="Danh sách đổi trả hàng" closed="true"
+            style="width:1500px; height: 90%;padding:10px;"
+        >
+            <table id="dg-danhsachphieudoitrahang" class="easyui-datagrid" title="Danh sách phiếu đổi trả hàng" 
+                style=" width:1470px; height:600px;"
+                pageSize="20" 
+                fitColumns="true" showFooter="true" pagination="true"
+                rownumbers="true"   
+                data-options=" 
+                    fitColumns:true,
+                    singleSelect: true,
+                    toolbar:'#qldth-tpx-tlb',
+                    url:'../sanphams/combogrid_sp?taidulieudoitrahang'"
+            >
+                <thead>
+                    <tr>
+                        <th data-options="field:'idpdt', align:'center'" ><b>idPĐT</b></th>
+                        <th data-options="field:'mapdt' "><b>Mã phiếu ĐT </b></th>
+                        <th data-options="field:'mapn',align:'center',"><b>Mã PN</b></th>
+                        <th data-options="field:'Ten',align:'left',"><b>Tên khách hàng</b></th>
+                        <th data-options="field:'thanhtien',align:'right',formatter:formatCurrency"><b>Tổng phiếu đổi trả</b></th>
+                        <th data-options="field:'mapx' ,width:'100px' "><b>idPX </b></th>
+                        <th data-options="field:'tongphieuxuat',align:'right',formatter:formatCurrency"><b>Tổng phiếu xuất</b></th>
+                        <th data-options="field:'tongdathanhcntt',align:'right',formatter:formatCurrency"><b>Tổng đã thanh</b></th>
+                        <th data-options="field:'noconlai',width:'100px',align:'right',formatter:formatCurrency"><b>Nợ còn lại</b></th>
+                        <th data-options="field:'ngaytrahang',align:'center',"><b>Ngày trả hàng</b></th> 
+                        <th data-options="field:'ghichu',width:'300px',align:'right',"><b>Ghi chú</b></th> 
+
+                        <th data-options="field:'tinhtrang',width:170,align:'center',
+                            formatter:function(value,row,index){
+                                if(value=='0'){
+                                    return 'Chưa xuất phiếu'
+                                } else{
+                                    return 'Đã xuất phiếu'
+                                }
+                            }">
+                            <b>Tình trạng</b>
+                        </th> 
+
+                    </tr>
+                </thead>
+            </table> 
+        </div>
+
+        <!--Toolbar doi tra hang -->
+        <div id="qldth-tpx-tlb" style="height:auto">
+
+            <input class="easyui-combobox" prompt="Lựa chọn khách hàng" name="congnokh-combobox-customer" 
+                style="width:250px;" 
+                id="khachhang_xk" 
+                data-options="valueField:'MaKH',
+                    textField:'Ten',
+                    url:'../khachhangs/dskh',
+                    onChange: function(newval,oldval){
+                        $('#dg-danhsachphieudoitrahang').datagrid('load',{timkiemkh:newval});
+                    }"
+            >
+            
+            Từ: <input id="db-QLDT-from" class="easyui-datebox" data-options="formatter:myformatter,parser:myparser,panelHeight:300" style="width:130px">
+            đến: <input id="db-QLDT-to" class="easyui-datebox" data-options="formatter:myformatter,parser:myparser,panelHeight:300" style="width:130px">
+
+            <input class="easyui-textbox" data-options="prompt:'maPDT, maPX, Tên NV, Tên KH', 
+                onChange:function(val1,val2){
+                    $('#dg-danhsachphieudoitrahang').datagrid('load',{timkiemphieudoitra:val1})
+                }" 
+                style="width:250px;"
+            >
+
+            <a class="easyui-linkbutton" data-options="iconCls:'icon-search'" style="width:auto" onclick="
+                $makh=$('#khachhang_xk').combobox('getValue')
+                $bien={makh:$makh}
+                timkiemkethop('db-QLDT-from','db-QLDT-to','dg-danhsachphieudoitrahang',$bien)">
+                Tìm kiếm
+            </a>
+
+            <a href="#" onclick="xuatphieudoitrapdf()" class="easyui-linkbutton" data-options="iconCls:'iconPdf'" style="width:auto">Xuất phiếu để nhập kho</a>
+            
+            <a href="#" onclick="xuatphieudoitraEXCEL()" class="easyui-linkbutton" data-options="iconCls:'excel_icon'" style="width:auto">Xuất phiếu EXCEL</a>
+        
+            <a onclick="xoaphieudoitra()" class="easyui-linkbutton" data-options="iconCls:'icon-remove'" style="width:auto">Xóa phiếu đổi trả</a>
+        
+        </div>
+
+        <!--Toolbar xuất kho-->
+        <div id="qlxk-tpx-tlb" style="height:auto">
+
+            <label>Sản phẩm</label>
+            <input type="text"  id="combogrid-doitrahang" 
+                class="easyui-combogrid" fitColumns="true"  labelPosition="top" style="width:300px;"  
+                prompt="nhập maSP hoặc tên SP"
+                data-options="panelWidth:1000,
+                    idField:'id',
+                    textField:'tensp',
+                    url:'../sanphams/combogrid_sp?doitrahang&mapdt=<?php echo $mapdt ;?>',
+                    pagination:'true',
+                    rownumbers:'true',
+                    multiple: true,
+                    columns:[[
+                        {field:'ck',checkbox:true},
+                        {field:'masanpham',title:'<b>Mã sản phẩm</b>',width:120,align:'center'},
+                        {field:'tensp',title:'<b>Tên sản phẩm</b>',width:300},
+                        {field:'soLxuat',title:'<b>Số lượng</b>',width:80,align:'center',},
+                        {field:'giaxuatspnv',title:'<b>Giá(VNĐ)</b>',width:120,formatter:formatCurrency,align:'center'},
+                        {field:'soloxuat',title:'<b>Số lô</b>',width:80,align:'center',},
+                        {field:'soqr',title:'<b>Số QR</b>',width:80,align:'center',}
+                    ]],
+                    onChange:function(val1,val2){
+                        var g = $('#combogrid-doitrahang').combogrid('grid');   
+                        // get datagrid object
+                        g.datagrid('load',{q:$('#qlxk-dg').datagrid('getSelected').id, masp:val1});
+                    }"
+            />
+
+
+            <label>Số QR</label>
+            <input type="text" id="qlpdt-qr"  style="width:150px; text-align: start; margin: 0px; padding-top: 0px; padding-bottom: 0px; height: 26px; line-height: 26px; border-radius: 5px; border: 1px solid #e0ecff;" >
+
+            <label> SL</label>
+            <input style="width:80px" 
+                id="sl_them"  
+                name="sl_them"  
+                type="number"  
+                class="easyui-numberspinner"
+                data-options="min:1,required:true,value:'1',"
+            >
+
+            <label>Số tiền giảm:</label> 
+            <input style="width:200px"   
+                id="sotiengiam"   
+                name="sotiengiam" 
+                class="easyui-numberspinner"
+                data-options="
+                    groupSeparator:'.',
+                    onChange:function(val1,val2){
+                        var row = $('#combogrid-doitrahang').combogrid('grid').datagrid('getSelected');
+                        if(row){
+                            var gia = row.giaxuatspnv;
+                            if(parseInt(gia) < parseInt(val1)){
+                                thongbao('Số tiền giảm phải nhỏ hơn giá sản phẩm')
+                                $('#sotiengiam').numberspinner('setValue',gia)
+                            }
+                            else{
+                                $phantram= ((val1*100)/gia)
+                                $('#chietkhau_them').numberspinner('setValue',$phantram)
+                            }           
+                        }
+                        else{
+                            thongbao('Vui lòng chọn sản phẩm xuất')
+                            $('#combogrid-doitrahang').combogrid('textbox').focus();
+                        }
+                    }"
+            >
+
+            <label>Chiết khấu:</label> 
+            <input style="width:80px"   
+                id="chietkhau_them" value="0"  
+                name="chietkhau_them" 
+                class="easyui-numberspinner"   
+                data-options="suffix:'%',min:0,max:100,precision:4"
+            >
+
+            <a  href="javascript:void(0)" 
+                class="easyui-linkbutton" 
+                data-options="iconCls:'icon-add'" 
+                onclick="themsanphamphieudoitra()">
+                Lưu sản phẩm
+            </a>
+
+            <a href="javascript:void(0)" 
+                class="easyui-linkbutton" 
+                data-options="iconCls:'icon-remove'" 
+                onclick="xoasanphamphieudoitra()">
+                Xóa
+            </a>
+            
+        </div>
+
+    </center>
+{% endblock %}

@@ -1,0 +1,89 @@
+{% extends "../trangchu/header.html" %}
+
+{% load static %}
+{% block js %}
+<script type="text/javascript" src="{% static 'js/ajax_quanlynhacungcap.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+    <center class="content_center">
+
+        <table  
+            style="width: 1521px;height: 600px; margin: auto; border: 2px;"
+            id="dg_ncc" 
+            class="easyui-datagrid" 
+            title="Danh sách nhà cung cấp" 
+            url="taiDuLieu_ncc" 
+            iconCls='icon-save'  
+            toolbar="#toolbar_ncc" 
+            pagination="true"
+            rownumbers="true" 
+            singleSelect="true" 
+            sortOrder="asc" 
+            fitColumns="true"     
+        >
+            <thead>
+                <tr>
+                    <th data-options="field:'Mansx' " sortable="true" width="100px" ><b>Mã NCC</b></th>
+                    <th data-options="field:'Tennsx' " sortable="true" width="100px" ><b>Tên nhà cung cấp</b></th>
+                    <th data-options="field:'diachi' " sortable="true"  width="100px;" ><b>Địa chỉ</b></th>
+                    <th data-options="field:'Sdt' " sortable="true"  width="100px;" ><b>Số điện thoại</b></th>
+                </tr>
+            </thead>
+
+            <tbody>
+                <tr>
+                    <td>MPL041</td>
+                    <td>Mibiti Prudente Biowhite L1A (5ml)</td>
+                    <td>Mibiti</td>
+                    <td>05051544</td>
+                </tr>
+            </tbody>
+
+        </table>
+        
+        <div id="toolbar_ncc">
+            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-add"  onclick="themSP_ncc()">Thêm nhà cung cấp</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit"   onclick="suasp_ncc()">Chỉnh sửa</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-remove"   onclick="Xoasp_ncc()">Xóa</a>
+            <a href="{% url 'sanpham:index' %}" class="easyui-linkbutton">Sản phẩm</a>
+        </div>
+
+        <!-- them moi -->
+        <div 
+            id="dlg_ncc" 
+            class="easyui-dialog" 
+            style="width:500px;height:auto;padding:10px 20px;"  
+            closed="true" 
+            buttons="#dlg-buttons_ncc"
+        >
+            <form id="fm_ncc" method="post">
+                {% csrf_token %}
+                <table>
+
+                    <tr>
+                        <td>Tên nhà cung cấp:</td>
+                        <td><input class="easyui-validatebox tb" name="ten_ncc" id="ten_ncc" style="width:260px;" data-options="required:true"></input></td>
+                    </tr>
+
+                    <tr>
+                        <td>Địa chỉ:</td>
+                        <td><textarea name="dc_ncc" class="easyui-validatebox "data-options="required:true"  required="required" id="dc_ncc" autocomplete="off"  placeholder="" rows="4" cols="33"></textarea></td>
+                    </tr>
+
+                    <tr>
+                        <td>Số điện thoại:</td>
+                        <td><input name="sdt_ncc" style="width:260px;" id="sdt_ncc" class="easyui-validatebox tb"></input></td>
+                    </tr>
+                    
+                </table>
+            </form>
+        </div>
+        <div id="dlg-buttons_ncc">
+            <a href="#" class="easyui-linkbutton" iconCls="icon-ok" id="luuSP_ncc">Lưu</a>
+            <a href="#" class="easyui-linkbutton" iconCls="icon-ok"  id="capnhatSP_ncc">Cập Nhật</a>
+            <a href="#" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#dlg_ncc').dialog('close')">Hủy</a>
+        </div>
+
+    </center>
+{% endblock %}

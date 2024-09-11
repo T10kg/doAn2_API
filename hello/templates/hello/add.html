@@ -1,0 +1,70 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Product</title>
+    <script>
+        async function submitForm(event) {
+            event.preventDefault(); // Ngăn chặn hành động mặc định của form
+            
+            // Lấy dữ liệu từ form
+            const formData = new FormData(event.target);
+            const data = {
+                name: formData.get('name'),
+                price: parseFloat(formData.get('price')),
+                description: formData.get('description')
+            };
+
+            try {
+                // Gửi dữ liệu đến API
+                const response = await fetch('/api/products/add/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                // Xử lý phản hồi từ API
+                const result = await response.json();
+                if (response.ok) {
+                    console.log('Product added:', result);
+                    alert('Product added successfully!');
+                    // Có thể làm mới form hoặc chuyển hướng người dùng
+                    event.target.reset();
+                } else {
+                    console.error('Error:', result);
+                    alert('Failed to add product. Please check the console for details.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred. Please check the console for details.');
+            }
+        }
+    </script>
+</head>
+<body>
+    <h1>Add Product</h1>
+    <form onsubmit="submitForm(event)">
+        <label>
+            Name:
+            <input type="text" name="name" required>
+        </label>
+        <br>
+        <label>
+            Price:
+            <input type="number" name="price" step="0.01" required>
+        </label>
+        <br>
+        <label>
+            Description:
+            <textarea name="description" required></textarea>
+        </label>
+        <br>
+        <button type="submit">Add Product</button>
+    </form>
+</body>
+</html>
+

@@ -1,0 +1,40 @@
+{% extends "../trangchu/header.html" %}
+
+{% load static %}
+{% block js %}
+<script type="text/javascript" src="{% static 'js/ajax_tonkho.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+  <center class="content_center">
+
+    <table id="dg_sanphampxloidongtonbokho" class="easyui-datagrid" title="Danh sách phiếu xuất lỗi đồng bộ toàn kho" 
+        style="width: 1521px;height: 600px; margin: auto; border: 2px;" 
+        url="taidulieusanphamsanphamphieuxuat_loidongbotonkho" 
+        toolbar="#toolbar_tk" pagination="true"
+        rownumbers="true"  singleSelect="true" 
+        collapsible="true" sortOrder="asc"  
+        remoteSort="fasle" iconCls='icon-save'
+        fitColumns="true" 
+        pageSize="20"
+    >
+        <thead>
+        <tr>
+            <th data-options="field:'id',width:50, align:'center'" ><b>id</b></th>
+            <th data-options="field:'maPhieuxuat',width:150, align:'center'" ><b>Mã phiếu xuất</b></th>
+            <th data-options="field:'tenNVKD',width:160" ><b>NV kinh doanh</b></th>
+            <th data-options="field:'Ten',width:170"><b>Tên khách hàng</b></th>
+            <th data-options="field:'tongphieuX',width:120, align:'right',formatter:formatCurrency"><b>Tổng phiếu(VNĐ)</b></th>
+            <th data-options="field:'tongthanhtoan',width:139, align:'right',formatter:formatCurrency"><b>Tổng trả trước(VNĐ)</b></th>
+            <th data-options="field:'ngayxuat',width:160,align:'center'"><b>Ngày tạo phiếu</b></th>
+            <th data-options="field:'hinhthucthanh',width:160,align:'left'"><b>Hình thức thanh toán</b></th>
+            <th data-options="field:'ghichu',width:200,align:'center'"><b>Ghi chú</b></th>
+        </tr>
+        </thead> 
+    </table>
+    <div id="toolbar_tk">    
+        <a class="easyui-linkbutton" data-options="iconCls:'icon-search'" style="width:auto" onclick="dongbophieuxuatsantonkho()" >Đồng bộ sản phẩm phiếu sang tồn kho</a>
+    </div>
+
+  </center>
+{% endblock %}
