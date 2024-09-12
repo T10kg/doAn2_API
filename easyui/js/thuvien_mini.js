@@ -14,14 +14,14 @@
 //     , 10)
 // }
 
-function formatCurrency(value = 0) {
+function formatCurrency(value=0) {
     return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
 }
 
 function sendajax(url, bien) {
     $.post(url, {
         thamso: bien
-    }, function (data) {
+    }, function(data) {
         if (data) {
             $.messager.show({
                 title: 'Thông Báo',
@@ -33,9 +33,9 @@ function sendajax(url, bien) {
 function sendandsetval(url_1, bien_1, arr) {
     $.post(url_1, {
         thamso: bien_1
-    }, function (data) {
+    }, function(data) {
         if (data) {
-            Object.keys(arr).forEach(function (key) {
+            Object.keys(arr).forEach(function(key) {
                 $("#" + arr[key]).numberbox("setValue", data)
             })
         }
@@ -44,43 +44,54 @@ function sendandsetval(url_1, bien_1, arr) {
 function send_and_set_data_by_id(b, c, d) {
     $.post(b, {
         thamso: c
-    }, function (a) {
+
+    }, function(a) {
         a && $("#" + d).html(a)
     })
 }
-; function canhbao(data) {
-    if (data == "Trùng số QR hoặc SL tồn < SL xuất") {
-        thongbaocanhbao(data)
-    } else if (data == "Mã QR không tồn tại trong nhập kho, vui lòng kiểm tra lại") {
-        thongbaocanhbao(data)
-    } else if (data == "Mã Vạch không tồn tại trong nhập kho, vui lòng kiểm tra lại") {
-        thongbaocanhbao(data)
-    } else if (data == "Số lượng vượt tồn kho, vui lòng kiểm tra lại") {
-        thongbaocanhbao(data)
-    } else if (data == "Có lỗi xảy ra vui lòng kiểm tra lại") {
-        thongbaocanhbao(data)
+;function canhbao(thongbao) {
+    if (thongbao == "Trùng số QR hoặc SL tồn < SL xuất") {
+        thongbaocanhbao(thongbao)
+    } else if (thongbao == "Mã QR không tồn tại trong nhập kho, vui lòng kiểm tra lại") {
+
+        thongbaocanhbao(thongbao)
+    } else if (thongbao == "Mã Vạch không tồn tại trong nhập kho, vui lòng kiểm tra lại") {
+
+        thongbaocanhbao(thongbao)
+    } else if (thongbao == "Số lượng vượt tồn kho, vui lòng kiểm tra lại") {
+
+        thongbaocanhbao(thongbao)
+    } else if (thongbao == "Có lỗi xảy ra vui lòng kiểm tra lại") {
+
+        thongbaocanhbao(thongbao)
     } else {
         $.messager.show({
             title: 'Thông Báo',
-            msg: data
+            msg: thongbao
         })
     }
 }
-function sendajax3(url, bien, datagrid, thongbao) {
-    $.post(url, {
-        thamso: bien
-    }, function (data) {
-        alert(data)
-        if (data) {
-            canhbao(data)
-            $("#" + datagrid).datagrid("reload")
+function sendajax3(url, bien, datagrid) {
+    $.ajax({
+        url: url,
+        type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({ thamso: bien }), // Ensure thamso does not have syntax errors
+        success: function(thongbao) {
+            if (thongbao) {
+                canhbao(thongbao); // Assuming canhbao is a function that handles the alert or warning
+                $("#" + datagrid).datagrid("reload"); // Reload the datagrid after the AJAX call is successful
+            }
         }
-    })
+    });
 }
-function sendajax(url, bien, datagrid, func) {
+
+
+
+function sendajax4(url, bien, datagrid, func) {
     $.post(url, {
         thamso: bien
-    }, function (data) {
+    }, function(data) {
         if (data) {
             canhbao(data)
             $("#" + datagrid).datagrid("reload");
@@ -92,7 +103,7 @@ function getdataajax(url, bien, biensetvalue) {
     var tam = 0;
     $.post(url, {
         thamso: bien
-    }, function (data) {
+    }, function(data) {
         if (data) {
             tam = data
         } else {
@@ -128,34 +139,41 @@ function thongbaocanhbao(bien) {
 }
 function xoadulieuajax(url, bien, datagrid, msg) {
     $.messager.confirm('Confirm', msg, function (r) {
+        console.log(bien)
         if (r) {
-            $.post(url, {
-                thamso: bien
-            }, function (data) {
-                if (data) {
-                    $.messager.show({
-                        title: 'Thông Báo',
-                        msg: data
-                    });
-                    $("#" + datagrid).datagrid("reload")
+            $.ajax({
+                url: url,
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({thamso: bien}), // Ensure thamso does not have syntax errors
+                success: function (data) {
+                    if (data) {
+                        $.messager.show({
+                            title: 'Thông Báo',
+                            msg: data
+                        });
+                        $("#" + datagrid).datagrid("reload")// Reload the datagrid after the AJAX call is successful
+                    }
                 }
-            })
+            });
         }
     })
 }
 function chuyenkho_reload_trang(url, bien, datagrid, msg) {
-    $.messager.confirm('Confirm', msg, function (r) {
+
+    $.messager.confirm('Confirm', msg, function(r) {
         if (r) {
             $.post(url, {
                 thamso: bien
-            }, function (data) {
+            }, function(data) {
                 if (data) {
                     $.messager.show({
                         title: 'Thông Báo',
                         msg: data
                     });
                     $("#" + datagrid).datagrid("reload");
-                    setTimeout(function () {
+
+                    setTimeout(function() {
                         location.reload()
                     }, 500)
                 }
@@ -210,7 +228,8 @@ function xuattungaydenngaykho(tu, den, url, thamso) {
     }
 }
 function travethamsourl(myArray) {
-    var myArrayQry = myArray.map(function (el, idx) {
+
+    var myArrayQry = myArray.map(function(el, idx) {
         return 'thamso[' + idx + ']=' + el
     }).join('&');
     return myArrayQry
@@ -240,7 +259,7 @@ function xuatfile(tu, den, url, thamso) {
     }
 }
 function xuatfiletheodieukiennhap(url, msg) {
-    $.messager.prompt('Thông báo', msg, function (r) {
+    $.messager.prompt('Thông báo', msg, function(r) {
         if (r && r != "") {
             url = url + "?thamso=" + r
             window.open(url, '_blank')
@@ -281,7 +300,7 @@ function timkiemkethop(tu, den, datagrid, giatri) {
 function kiemtradieukien(url, bien) {
     $.post(url, {
         thamso: bien
-    }, function (data) {
+    }, function(data) {
         if (data) {
             if (data == "true") {
                 return !0
@@ -305,18 +324,19 @@ function myparser(s) {
     var m = parseInt(ss[1], 10);
     var y = parseInt(ss[2], 10);
     if (!isNaN(y) && !isNaN(m) && !isNaN(d)) {
-        return new Date(y, m - 1, d)
+
+        return new Date(y,m - 1,d)
     } else {
         return new Date()
     }
 }
 function parseDate(str) {
     var mdy = str.split('-');
-    return new Date(mdy[2], mdy[1], mdy[0])
+    return new Date(mdy[2],mdy[1],mdy[0])
 }
 function tailaitatcacactabphieu(maphieu, session) {
     if (maphieu != "" && typeof (maphieu) != "undefined") {
-        setInterval(function () {
+        setInterval(function() {
             var session_px = localStorage.getItem("" + session);
             if (session_px != maphieu) {
                 location.reload()
@@ -328,19 +348,19 @@ function kiemtrasodienthoai(str) {
     str = str.toString();
     return 10 == str.length ? /([0]{1}[0-9]{9})/g.test(str) ? !0 : !1 : !1
 }
-; function load_data_datagrid(id_datagrid, url_load_data) {
+;function load_data_datagrid(id_datagrid, url_load_data) {
     $.ajax({
         url: url_load_data,
         method: 'POST',
         dataType: 'json',
-        success: function (data) {
+        success: function(data) {
             $('#' + id_datagrid).datagrid('loadData', data);
             $('#' + id_datagrid).datagrid({
                 url: url_load_data
             });
             console.log('Data for datagrid loaded:', data);
         },
-        error: function (xhr, status, error) {
+        error: function(xhr, status, error) {
             console.error('Error loading data for datagrid:', error);
         }
     });
@@ -350,11 +370,11 @@ function load_data_combobox(id_combobox, url_load_data) {
         url: url_load_data,
         method: 'POST',
         dataType: 'json',
-        success: function (data) {
+        success: function(data) {
             $('#' + id_combobox).combobox('loadData', data);
             console.log('Data for combobox loaded:', data);
         },
-        error: function (xhr, status, error) {
+        error: function(xhr, status, error) {
             console.error('Error loading data for combobox:', error);
         }
     });

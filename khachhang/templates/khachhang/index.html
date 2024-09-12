@@ -3,6 +3,37 @@
 {% load static %}
 {% block js %}
 <script type="text/javascript" src="{% static 'js/ajax_quanlykhachhang_mini.js' %}"></script>
+<script>
+        $(function(){
+            $('#dg').datagrid(
+                {
+                    url: 'http://127.0.0.1:8000/api/danhsachKH/',  // URL để gửi yêu cầu AJAX
+                    method: 'get',
+                    onLoadSuccess: function (data) {
+                        console.log('Data loaded successfully:', data);
+                    },
+                    onLoadError: function () {
+                        console.log('Error loading data');
+                    }
+                }
+            ).datagrid('clientPaging');
+        });
+
+        $(function(){
+            $('#SNKH').datagrid(
+                {
+                    url: 'http://127.0.0.1:8000/khachhang/baosinhnhat/',  // URL để gửi yêu cầu AJAX
+                    method: 'get',
+                    onLoadSuccess: function (data) {
+                        console.log('Data loaded successfully:', data);
+                    },
+                    onLoadError: function () {
+                        console.log('Error loading data');
+                    }
+                }
+            ).datagrid('clientPaging');
+        });
+    </script>
 {% endblock %}
 
 {% block content %}
@@ -12,7 +43,7 @@
             <table id="dg" title="Quản lý khách hàng" class="easyui-datagrid" 
                 style="width: 1521px;height: 600px;"
                 pageSize="20"
-                url="taiDuLieu"
+                url=""
                 toolbar="#toolbar" pagination="true"
                 rownumbers="true" fitColumns="true" singleSelect="true"
             >
@@ -31,8 +62,6 @@
                         <th field="ngaytao" width="100"><b>Ngày tạo</b></th>
                     </tr>
                 </thead>
-
-    
             </table>
         </div>
     
@@ -49,7 +78,7 @@
                 id="nhanvienkd_kh" 
                 data-options="valueField:'maNV',
                     textField:'tenNV',
-                    url:'../nhanviens/dsNV'
+                    url:'../khachhang/nguoipt/'
             "> 
     
             <input class="easyui-combobox" prompt="Chọn cấp bậc khách hàng" name="capbackh-combobox-customer" 
@@ -57,11 +86,10 @@
                 id="capbac_kh" 
                 data-options="valueField:'Manhomkh',
                     textField:'Tennhomkh',
-                    url:'dsnhomkh'
+                    url:'../khachhang/dsnhomKH/'
             ">
     
-            <input type="text" placeholder="Tìm kiếm..."  name="tim" id="tim" class="easyui-validatebox tb" 
-                style="height:29px;width:220px;border-radius:5px;border:1px solid #95b8e7;">
+            <input type="text" placeholder="Tìm kiếm..."  name="tim" id="tim" class="easyui-validatebox tb" style="height:29px;width:220px;border-radius:5px;border:1px solid #95b8e7;">
             <a href="#" class="easyui-linkbutton" iconCls="icon-search"  id="timKH" onclick="timKH()">Tìm</a>
     
             <a class="easyui-linkbutton l-btn l-btn-small" iconcls="excel_icon" onclick="xuatdanhsachkhtheotimkiem()">Xuất danh sách</a>
@@ -92,15 +120,12 @@
                         <table>
                             <tr>
                                 <td ><label><b>Tên KH</b></label></td>
-                                <td><input required="required" name="Ten" 
-                                    style="width: 100%;height: 27px; border-radius:5px;border:1px solid #95b8e7; "  
-                                    class="easyui-validatebox"  id="tenKH" ></td>
+                                <td><input required="required" name="Ten" style="width: 100%;height: 27px; border-radius:5px;border:1px solid #95b8e7; "  class="easyui-validatebox"  id="tenKH" ></td>
                             </tr>
                             <tr>
                                 <td><label><b>Giới Tính</b></label></td>
                                 <td>
-                                    <select required="required" name="Gioitinh" id="gioiTinh" 
-                                    style="width: 100%;height: 27px; border-radius:5px;border:1px solid #95b8e7;margin-top: 3px">
+                                    <select required="required" name="Gioitinh" id="gioiTinh" style="width: 100%;height: 27px; border-radius:5px;border:1px solid #95b8e7;margin-top: 3px">
                                         <option value="Nữ">
                                             Nữ	
                                         </option>
@@ -113,25 +138,19 @@
     
                             <tr>
                                 <td><label><b>Số ĐT:</b></label></td>
-                                <td><input required="required" name="Dienthoai" id="soDT" 
-                                    style="width: 100%;height: 27px; border-radius:5px;border:1px solid #95b8e7;margin-top: 3px"  
-                                    class="easyui-validatebox"  ></td>
+                                <td><input required="required" name="Dienthoai" id="soDT" style="width: 100%;height: 27px; border-radius:5px;border:1px solid #95b8e7;margin-top: 3px"  class="easyui-validatebox"  ></td>
                             </tr>
                             <tr>
                                 <td><label><b>Địa Chỉ</b></label></td>
-                                <td><input required="required"  name="Dc" id="diachi" 
-                                    style="width: 100%;height: 27px; border-radius:5px;border:1px solid #95b8e7;margin-top: 3px"  
-                                    class="easyui-validatebox" ></td>
+                                <td><input required="required"  name="Dc" id="diachi" style="width: 100%;height: 27px; border-radius:5px;border:1px solid #95b8e7;margin-top: 3px"  class="easyui-validatebox" ></td>
                             </tr>
                             <tr style="margin-top: 5px">
                                 <td><label><b>Tỉnh:</b></label></td>
-                                <td><input name="Matinh" 
-                                    style="width: 100%;height: 30px; border-radius:5px;border:1px solid #95b8e7;margin-top: 5px"   
-                                    class="easyui-combobox" required="required" id="tinh" 
+                                <td><input name="Matinh" style="width: 100%;height: 30px; border-radius:5px;border:1px solid #95b8e7;margin-top: 5px"   class="easyui-combobox" required="required" id="tinh"
                                     data-options="
                                         valueField: 'provinceid', 
                                         textField: 'name', 
-                                        url: 'dst',
+                                        url: '{% url "khachhang:danhsachtinh" %}',
                                         onChange:function(val1,val2){
                                             dsh()
                                         }"
@@ -141,26 +160,24 @@
                             <tr>
                                 <td><label><b>Quận/Huyện:</b></label></td>
                                 <td>
-                                    <input required="required" name="Mahuyen" id="huyen" 
-                                    style="width: 100%;height: 30px; border-radius:5px;border:1px solid #95b8e7;margin-top: 3px"  
-                                    class="easyui-combobox" 
+                                    <input required="required" name="Mahuyen" id="huyen" style="width: 100%;height: 30px; border-radius:5px;border:1px solid #95b8e7;margin-top: 3px"  class="easyui-combobox" 
                                     data-options="
-                                        mode:'local',
+                                        mode:'remote',
                                         valueField: 'districtid',
                                         textField: 'name', 
-                                        url: 'dsh'
-                                        "
+                                        url: '{% url "khachhang:danhsachhuyen" %}',
+                                        queryParams: {
+                                            maDon: ''  // Đặt giá trị mặc định cho maDon
+                                        }"
                                 >
                                 </td>
                             </tr>
                             <tr>
                                 <td ><label><b>Người Phụ Trách:</b></label></td>
                                 <td>
-                                    <input required="required" name="maNV" 
-                                    style="width: 100%;height: 30px; border-radius:5px;border:1px solid #95b8e7;margin-top: 3px"  
-                                    id="npt" class="easyui-combobox" 
+                                    <input required="required" name="maNV" style="width: 100%;height: 30px; border-radius:5px;border:1px solid #95b8e7;margin-top: 3px"  id="npt" class="easyui-combobox" 
                                         data-options="
-                                            url:'dsnv',
+                                            url:'{% url "khachhang:nguoipt" %}',
                                             valueField: 'maNV',
                                             textField: 'tenNV'"
                                     />
@@ -168,15 +185,11 @@
                             </tr>
                             <tr >
                                 <td><label><b>Công ty/spa:</b></label></td>
-                                <td><input name="Diachi_nharieng" 
-                                    style="width: 100%;height: 30px; border-radius:5px;border:1px solid #95b8e7;margin-top: 3px"  
-                                    id="diachinr" class="easyui-validatebox"></td>
+                                <td><input name="Diachi_nharieng" style="width: 100%;height: 30px; border-radius:5px;border:1px solid #95b8e7;margin-top: 3px"  id="diachinr" class="easyui-validatebox"></td>
                             </tr>
                             <tr style="display: none;">
                                 <td><label><b>Mã Số Thuế:</b></label></td>
-                                <td><input name="Mathue" id="mST" 
-                                    style="width: 100%;height: 30px; border-radius:5px;border:1px solid #95b8e7"  
-                                    class="easyui-validatebox" 
+                                <td><input name="Mathue" id="mST" style="width: 100%;height: 30px; border-radius:5px;border:1px solid #95b8e7"  class="easyui-validatebox" 
                                     data-options="validType:['number']">
                                 </td>
     
@@ -191,47 +204,30 @@
                         <table >
                             <tr>
                                 <td><label><b>Ngày sinh:</b></label></td>
-                                <td><input name="ngaysinh" id="ngaySinh" class="easyui-datebox" 
-                                    data-options="panelHeight:300" 
-                                    style="width: 100%;height: 30px; border-radius:5px;border:1px solid #95b8e7;margin-top: 3px"  >
-                                </td>
+                                <td><input name="ngaysinh" id="ngaySinh" class="easyui-datebox" data-options="panelHeight:300" style="width: 100%;height: 30px; border-radius:5px;border:1px solid #95b8e7;margin-top: 3px"  ></td>
                             </tr>
                             <tr>
                                 <td><label><b>Fax:</b></label></td>
-                                <td><input name="Fax" id="fax" 
-                                    style="width: 100%;height: 30px; border-radius:5px;border:1px solid #95b8e7;margin-top: 3px"  
-                                    class="easyui-validatebox" >
-                                </td>
+                                <td><input name="Fax" id="fax" style="width: 100%;height: 30px; border-radius:5px;border:1px solid #95b8e7;margin-top: 3px"  class="easyui-validatebox" ></td>
                             </tr>
     
                             <tr>
                                 <td><label><b>Email:</b></label></td>
-                                <td><input name="Email" 
-                                    style="width: 100%;height: 30px; border-radius:5px;border:1px solid #95b8e7;margin-top: 3px"  
-                                    id="Email" class="easyui-validatebox"  validType="email">
-                                </td>
+                                <td><input name="Email" style="width: 100%;height: 30px; border-radius:5px;border:1px solid #95b8e7;margin-top: 3px"  id="Email" class="easyui-validatebox"  validType="email"></td>
                             </tr>
                             <tr>
                                 <td><label><b>Sở thích KH:</b></label></td>
-                                <td><textarea cols="33" rows="2" name="Sothich" 
-                                    id="sothich" 
-                                    style="width: 100%;height: 30px; border-radius:5px;border:1px solid #95b8e7;margin-top: 3px" >
-                                    </textarea>
-                                </td>
+                                <td><textarea cols="33" rows="2" name="Sothich" id="sothich" style="width: 100%;height: 30px; border-radius:5px;border:1px solid #95b8e7;margin-top: 3px" ></textarea></td>
                             </tr>
     
                             <tr>
                                 <td><label><b>Nghề nghiệp:</b></label></td>
-                                <td><input name="Chucvu" class="easyui-validatebox" 
-                                    style="width: 100%;height: 30px; border-radius:5px;border:1px solid #95b8e7;margin-top: 3px" id="cv" >
-                                </td>
+                                <td><input name="Chucvu" class="easyui-validatebox" style="width: 100%;height: 30px; border-radius:5px;border:1px solid #95b8e7;margin-top: 3px" id="cv" ></td>
                             </tr>
                         
                             <tr >
                                 <td><label><b>Ghi chú:</b></label></td>
-                                <td><input name="Mota" class="easyui-validatebox" 
-                                    style="width: 100%;height: 30px; border-radius:5px;border:1px solid #95b8e7;margin-top: 3px"  id="mt" >
-                                </td>
+                                <td><input name="Mota" class="easyui-validatebox" style="width: 100%;height: 30px; border-radius:5px;border:1px solid #95b8e7;margin-top: 3px"  id="mt" ></td>
                             </tr>
     
                         </table>
@@ -244,20 +240,16 @@
                         <table>
                             <tr>
                                 <td><label><b>Người Giới Thiệu:</b></label></td>
-                                <td><input name="Nguoigioithieu" class="easyui-validatebox" 
-                                    style="width: 100%;height: 30px; border-radius:5px;border:1px solid #95b8e7;margin-top: 3px"  id="ngt" >
-                                </td>
+                                <td><input name="Nguoigioithieu" class="easyui-validatebox" style="width: 100%;height: 30px; border-radius:5px;border:1px solid #95b8e7;margin-top: 3px"  id="ngt" ></td>
                             </tr>
                             <tr>
                                 <td><label><b>Nhóm KH:</b></label></td>
                                 <td>
-                                    <input  name="Manhom" required="required" 
-                                    style="width: 100%;height: 30px; border-radius:5px;border:1px solid #95b8e7;margin-top: 3px"   
-                                    id="nkh" class="easyui-combobox" 
+                                    <input  name="Manhom" required="required" style="width: 100%;height: 30px; border-radius:5px;border:1px solid #95b8e7;margin-top: 3px"   id="nkh" class="easyui-combobox" 
                                         data-options="
                                             valueField: 'Manhomkh',
                                             textField: 'Tennhomkh', 
-                                            url: 'dsnhomkh',
+                                            url: '{% url "khachhang:nhomkh" %}',
                                             onLoadSuccess:function(items){
                                                 if (items.length){
                                                     var opts = $('#nkh').combobox('options');
@@ -270,11 +262,12 @@
                             </tr>
                             <tr>
                                 <td><label><b>Nguồn KH:</b></label></td>
-                                <td><input required="required" 
-                                    style="width: 100%;height: 30px; border-radius:5px;border:1px solid #95b8e7;margin-top: 3px"  
-                                    id="nguonkh" name="maNguonKH" class="easyui-combobox" 
+
+                                <td><input required="required" style="width: 100%;height: 30px; border-radius:5px;border:1px solid #95b8e7;margin-top: 3px"  id="nguonkh" name="maNguonKH" class="easyui-combobox" 
+
                                     data-options="
-                                        url:'dsnguonkh',editable:false,
+
+                                        url: '{% url "khachhang:dsnguonKH" %}',editable:false,
                                         valueField: 'maNguon',
                                         textField: 'tenNguon',
                                         onLoadSuccess:function(items){
@@ -289,12 +282,9 @@
                             <tr>
                                 <td><label><b>Mối Quan Hệ</b></label></td>
                                 <td>
-                                    <input id="mqhkh" class="easyui-combobox" 
-                                    required="required" 
-                                    style="width: 100%;height: 30px; border-radius:5px;border:1px solid #95b8e7;margin-top: 3px" 
-                                    name="maMQHe" 
+                                    <input id="mqhkh" class="easyui-combobox" required="required" style="width: 100%;height: 30px; border-radius:5px;border:1px solid #95b8e7;margin-top: 3px"  name="maMQHe" 
                                         data-options="
-                                            url:'dsMQHKH', editable:false,
+                                            url:'{% url "khachhang:moiqh" %}', editable:false,
                                             valueField: 'maMQH',
                                             textField: 'TenMQH',
                                             onLoadSuccess:function(items){
@@ -314,17 +304,13 @@
             <div id="dlg-buttons">
                 <a href="#" class="easyui-linkbutton" iconCls="icon-save" id="luuKH"><b>Lưu</b></a>
                 <a href="#" class="easyui-linkbutton" iconCls="icon-ok"  id="capnhatKH"><b>Cập nhật</b></a>
-                <a href="#" class="easyui-linkbutton" iconCls="icon-cancel" 
-                    onclick="javascript:$('#dlg').dialog('close');$('#dg').datagrid('reload');"><b>Thoát</b>
-                </a>
+                <a href="#" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#dlg').dialog('close');$('#dg').datagrid('reload');"><b>Thoát</b></a>
             </div>
         </div>
     
         <!-- nhân viên phụ trách -->
         <div id="dlg-buttonsSN" title="Danh sách nhân viên phụ trách">
-            <a href="#" class="easyui-linkbutton" iconCls="icon-cancel" 
-                onclick="javascript:$('#dlg_sinhnhat').dialog('close');"><b>Đóng</b>
-            </a>
+            <a href="#" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#dlg_sinhnhat').dialog('close');"><b>Đóng</b></a>
         </div>
         
         <div id="dlg_nhanvienphutrach" title="Danh sách nhân viên phụ trách" 
@@ -332,13 +318,13 @@
             style=" width:700px; min-height:400px; padding:10px 20px"
             closed="true" 
             buttons="#dlg-buttonnhanvienphutrach"
-            url="taiDuLieuSN"
+            url=""
         >
             <br>
             <table title="Nhân viên phụ trách" 
                 id="nhanvienpt_dg" 
                 class="easyui-datagrid" style="width:100%;height:500px "
-                url="taidulieunvpt"
+                url="../khachhang/taiDuLieuNV/"
                 pagination="true"
                 rownumbers="true" 
                 fitColumns="true" 
@@ -349,9 +335,11 @@
                     <tr>
                         <th field="Sdt"><b>Số ĐT</b></th>
                         <th field="tenNV"><b>Tên Nhân Viên</b></th>
-                        <th field="gioiTinh"><b>Ngày sinh</b></th>
+                        <th field="ngaySinh"><b>Ngày sinh</b></th>
                         <th field="gioiTinh" ><b>Giới tính</b></th>
                         <th field="ngayphutrach" ><b>Ngày phụ trách</b></th>
+{#                        Thêm trường id để xóa dòng#}
+                        <td style="display:none;" field = "id"></td>
                     </tr>
                 </thead>
             </table>
@@ -373,23 +361,21 @@
                 style="width:300px;"
                 data-options="valueField:'maNV',
                     textField:'tenNV',
-                    url:'../nhanviens/dsNV'"
+                    url:'../khachhang/nguoipt/'"
             > 
             <a href="#" class="easyui-linkbutton" iconCls="icon-add" onclick="themnvpt()"> Thêm nhân viên</a>
             <a href="#" class="easyui-linkbutton" iconCls="icon-remove" onclick="xoanvpt()">Xóa</a>
         </div>
     
         <!--dialog phan cap khach hang-->
-        <div id="phancapkhachhang_dlg" class="easyui-dialog" 
-            title="Thông tin phân cấp khách hàng" data-options="" 
-            closed="true" style="width:100%;height: 90%;padding:10px">
+        <div id="phancapkhachhang_dlg" class="easyui-dialog" title="Thông tin phân cấp khách hàng" data-options="" closed="true" style="width:100%;height: 90%;padding:10px">
             <br>
             <table id="phancapkh_dg" class="easyui-datagrid" title="Danh sách phân cấp khách hàng"
                 style=" width:99%; height:auto" 
                 fitColumns="true" showFooter="true" pagination="true"
                 rownumbers="true"  
                 showFooter="true"
-                url="../phancapkhs/taiduphancapkh" 
+                url="../khachhang/taiduphancapkh/"
                 data-options=" 
                     fitColumns:true,
                     toolbar:'#toolbar_phancapkhachhang',
@@ -415,7 +401,7 @@
                 id="khachphancap" 
                 data-options="valueField:'MaKH',
                     textField:'Ten',
-                    url:'../khachhangs/dskh?khachhangpckh',
+                    url:'../khachhang/khachhangpckh/',
                     onChange: function(newval,oldval){
                         $('#qlxk-dg').datagrid('load',{timkiemphieuxuatkhct:newval});
                     }"
@@ -433,14 +419,14 @@
             style=" width:700px; min-height:400px; padding:10px 20px"
             closed="true" 
             buttons="#dlg-buttonsSN"
-            url="taiDuLieuSN"
+            url=""
         >
             <center>
                 <div class="ftitle"><h2>DANH SÁCH SINH NHẬT KHÁCH HÀNG</h2></div>
             </center>
     
-            <table  title="Quản lý sinh nhật khách hàng" class="easyui-datagrid" style="width:100%;height:500px "
-                url="taiDuLieuSN"
+            <table id = "SNKH" title="Quản lý sinh nhật khách hàng" class="easyui-datagrid" style="width:100%;height:500px "
+                url=""
                 pagination="true"
                 rownumbers="true" fitColumns="true" singleSelect="true">
                 <thead>

@@ -1,10 +1,16 @@
 function themkho() {
+console.log(1)
     $("#kho-dlg").dialog("open");
+
     $('#kho-fm').form('clear')
+
     $('#daily').prop('checked', !0);
+
     $("#themkho").show();
     $("#suakho").hide();
+
     $("#themkho").removeClass('clicked')
+
     $("#themkho").click(function() {
         if (!$('#kho-fm').form('validate')) {
             return !1
@@ -29,7 +35,7 @@ function themkho() {
         }
         if (!$(this).hasClass('clicked')) {
             $("#themkho").addClass('clicked')
-            sendajax("themthongtinkho", bien, "kho-dg");
+            sendajax3("../khohang/themthongtinkho/", bien, "kho-dg");
             $("#kho-dlg").dialog("close")
         }
     })
@@ -63,7 +69,7 @@ function suakho() {
                 makhotxt: $makhotxt,
                 loaikho: $loaikho
             }
-            sendajax("suathongtinkho", bien, "kho-dg");
+            sendajax3("../khohang/suathongtinkho/", bien, "kho-dg");
             $("#kho-dlg").dialog("close")
         })
     } else {
@@ -78,7 +84,7 @@ function xoakho() {
         var bien = {
             makho: $makho
         }
-        sendajax("xoathongtinkho", bien, "kho-dg")
+        sendajax3("../khohang/xoathongtinkho/", bien, "kho-dg")
     } else {
         thongbao("Vui lòng chọn kho cần xóa");
         return !1
@@ -88,13 +94,9 @@ function nhanvienquanlykho() {
     var row = $("#kho-dg").datagrid("getSelected");
     if (row) {
         $("#nvql_dlg").dialog("open");
-        $makho = row.makho;
-        $("#nvql_cbx").combobox({
-            url: 'taidulieuthongtinkho?nvql&makho=' + $makho
-        })
-        $("#nvqlkho-dg").datagrid("load", {
-            makho: $makho
-        })
+        makho = row.makho;
+        $("#nvqlkho-dg").datagrid('options').url = '../khohang/nhanvienquanlykho/'+makho+'/';
+        $("#nvqlkho-dg").datagrid("load").datagrid('clientPaging');
     } else {
         thongbao("Vui lòng chọn kho cần thêm");
         return !1
@@ -109,36 +111,25 @@ function themnhanvienquanlykho() {
             manv: $manv,
             makho: $makho
         };
-        sendajax("themnhanvienquanlykho", $bien, "nvqlkho-dg");
-        $('#nvqlkho-dg').datagrid({
-            onLoadSuccess: function() {
-                $("#nvql_cbx").combobox({
-                    url: 'taidulieuthongtinkho?nvql&makho=' + $makho
-                })
-            }
-        })
+        sendajax3('../khohang/themnhanvienquanlykho/', $bien, "nvqlkho-dg");
     } else {
         thongbao("Vui lòng chọn kho cần thêm");
         return !1
     }
+
+
 }
 function xoanhanvienquanlykho() {
+
     var row = $("#nvqlkho-dg").datagrid("getSelected");
     var rowkho = $("#kho-dg").datagrid("getSelected");
-    $makho = rowkho.makho;
     if (row) {
-        $id = row.id;
-        $bien = {
-            id: $id
+        id = row.id;
+        bien = {
+            id: row.id
         };
-        sendajax("xoanhanvienquanlykho", $bien, "nvqlkho-dg");
-        $('#nvqlkho-dg').datagrid({
-            onLoadSuccess: function() {
-                $("#nvql_cbx").combobox({
-                    url: 'taidulieuthongtinkho?nvql&makho=' + $makho
-                })
-            }
-        })
+
+        sendajax3("../khohang/xoanhanvienquanlykho/", bien, "nvqlkho-dg");
     } else {
         thongbao("Vui lòng chọn kho cần thêm");
         return !1
@@ -148,13 +139,9 @@ function sanphamkho() {
     var row = $("#kho-dg").datagrid("getSelected");
     if (row) {
         $("#spkho_dlg").dialog("open");
-        $makho = row.makho;
-        $("#sp_cbx").combobox({
-            url: 'taidulieuthongtinkho?sp&makho=' + $makho
-        })
-        $("#spkho-dg").datagrid("load", {
-            makho: $makho
-        })
+        makho = row.makho;
+        $("#spkho-dg").datagrid('options').url = '../khohang/sanphamkho/'+makho+'/';
+        $("#spkho-dg").datagrid("load").datagrid('clientPaging');
     } else {
         thongbao("Vui lòng chọn kho cần thêm");
         return !1
@@ -170,14 +157,7 @@ function themspkho() {
             masp: $masp,
             makho: $makho
         };
-        sendajax("themsanphamkho", $bien, "spkho-dg");
-        $('#spkho-dg').datagrid({
-            onLoadSuccess: function() {
-                $("#sp_cbx").combobox({
-                    url: 'taidulieuthongtinkho?sp&makho=' + $makho
-                })
-            }
-        })
+        sendajax3("../khohang/themsanphamkho/", $bien, "spkho-dg");
     } else {
         thongbao("Vui lòng chọn kho cần thêm");
         return !1
@@ -186,20 +166,12 @@ function themspkho() {
 function xoasanphamkho() {
     var row = $("#spkho-dg").datagrid("getSelected");
     var rowkho = $("#kho-dg").datagrid("getSelected");
-    $makho = rowkho.makho;
     if (row) {
-        $id = row.id;
+        id_spk = row.id_spk;
         $bien = {
-            id: $id
+            id_spk: id_spk
         };
-        sendajax("xoasanphamkho", $bien, "spkho-dg");
-        $('#spkho-dg').datagrid({
-            onLoadSuccess: function() {
-                $("#sp_cbx").combobox({
-                    url: 'taidulieuthongtinkho?sp&makho=' + $makho
-                })
-            }
-        })
+        sendajax3("../khohang/xoasanphamkho/", $bien, "spkho-dg");
     } else {
         thongbao("Vui lòng chọn kho cần thêm");
         return !1

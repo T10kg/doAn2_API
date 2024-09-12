@@ -3,13 +3,31 @@
 {% load static %}
 {% block js %}
 <script type="text/javascript" src="{% static 'js/ajax_kho_mini.js' %}"></script>
+<script>
+    $(function(){
+            $('#kho-dg').datagrid(
+                {
+                    url: 'http://127.0.0.1:8000/khohang/duLieuKho/',  // URL để gửi yêu cầu AJAX
+                    method: 'get',
+                    onLoadSuccess: function (data) {
+                        console.log('Data loaded successfully:', data);
+                    },
+                    onLoadError: function () {
+                        console.log('Error loading data');
+                    }
+                }
+            ).datagrid('clientPaging');
+        });
+
+
+</script>
 {% endblock %}
 
 {% block content %}
     <center class="content_center">
 
         <table id="kho-dg" class="easyui-datagrid" style="width: 1521px;height: 600px; margin: auto; border: 2px;" 
-            url="data/datagrid_data.json"
+            url=""
             title="Thông tin kho" iconCls="icon-save"
             toolbar="#toolbar_kho" pagination="true">
             <thead>
@@ -25,16 +43,6 @@
                 </tr>
             </thead>
 
-            <tbody>
-                <tr>
-                    <td>92727</td>
-                    <td>XKKG240520001</td>
-                    <td>Phòng IT</td>
-                    <td>0</td>
-                    <td>XKKG240520001</td>
-                    <td>XKKG240520001</td>
-                </tr>
-            </tbody>
 
         </table>
 
@@ -59,23 +67,23 @@
             <form id="kho-fm" method="post">
                 {% csrf_token %}
                 <div class="fitem">
-                    <label style:="text-align:center">Mã kho:</label>
+                    <label style="text-align:center">Mã kho:</label>
                     <input name="makhotxt" class="easyui-textbox" required="true" style="width:262px" id="makhotxt">
                 </div>
                 <div class="fitem">
-                    <label style:="text-align:center">Tên kho:</label>
+                    <label style="text-align:center">Tên kho:</label>
                     <input name="tenkho" class="easyui-textbox" required="true" style="width:262px" id="tenkho">
                 </div>
                 <div class="fitem">
-                    <label style:="text-align:center">Địa chỉ kho:</label>
+                    <label style="text-align:center">Địa chỉ kho:</label>
                     <input name="diachi" class="easyui-textbox" required="true" style="width:262px" id="diachi">
                 </div>
                 <div class="fitem">
-                    <label style:="text-align:center">Ghi chú:</label>
+                    <label style="text-align:center">Ghi chú:</label>
                     <input name="ghichuKho" class="easyui-textbox" style="width:262px" id="ghichu">
                 </div>
                 <div class="fitem">
-                    <label style:="text-align:center">Loại kho:</label>
+                    <label style="text-align:center">Loại kho:</label>
                     <input type="radio" name="loaikho" id="tongcongty" value="0" checked="checked"> Công ty
                     <input type="radio" name="loaikho" id="daily" value="1" > Đại lý
                 </div>
@@ -92,7 +100,7 @@
         <div id="nvql_dlg" class="easyui-dialog" title="Thêm nhân viên quản lý kho" style="width: 600px; min-height:400px; padding: 10px 20px" 
         closed="true" buttons="#nvql_button">
             <table class="easyui-datagrid" id="nvqlkho-dg" style="width: 100%;height: 100%;" data-options="
-                url:'taidulieuthongtinkho?nvqlkho',
+                url:'',
                 fitColumns:true,
                 toolbar:'#toolbar_nvqlkho',
                 rownumbers:true,
@@ -101,6 +109,7 @@
             >
                 <thead>
                     <tr>
+                        <input type="hidden" id="id" name="id" value="">
                         <th data-options="field:'maNV',width:150"><b>Manv</b></th>
                         <th data-options="field:'tenNV',width:300"><b>Tên NV</b></th>
                         <th data-options="field:'gioiTinh',width:120"><b>Giới tính</b></th>
@@ -114,7 +123,7 @@
                     style="width:200px;" 
                     data-options="valueField:'maNV',
                     textField:'tenNV',
-                    url:'taidulieuthongtinkho?nvql'"
+                    url:'../khachhang/nguoipt/'"
                 >
                 <a id="kho-themkho" class="easyui-linkbutton" data-options="iconCls:'icon-add'" onclick="themnhanvienquanlykho()">Thêm</a>  
                 <a id="kho-xoakho" class="easyui-linkbutton" data-options="iconCls:'icon-remove'" onclick="xoanhanvienquanlykho()">Xóa</a> 
@@ -127,7 +136,7 @@
             closed="true" buttons="#nvql_button"
         >
             <table class="easyui-datagrid" id="spkho-dg" style="width: 100%;height: 100%;" data-options="
-                url:'taidulieuthongtinkho?spkho',
+                url:'',
                 fitColumns:true,
                 toolbar:'#toolbar_spkho',
                 rownumbers:true,
@@ -136,6 +145,7 @@
             >
                 <thead>
                     <tr>
+                        <input type="hidden" id="id_spk" name="id_spk" value="">
                         <th data-options="field:'MaSP',width:100,align:'center'"><b>Mã sản phẩm</b></th>
                         <th data-options="field:'tensp',width:400"><b>Tên Sản phẩm</b></th>
                         <th data-options="field:'gia_ban',formatter:formatCurrency, width:300"><b>Giá hiện tại</b></th>
@@ -145,7 +155,11 @@
             <div id="toolbar_spkho" >
                 <input class="easyui-combobox" prompt="Lựa chọn sản phẩm"  id="sp_cbx"
                     style="width:300px;" 
-                    data-options="valueField:'Masanpham',textField:'tensp'"
+                    data-options="
+                    valueField:'MaSP',
+                    textField:'tensp',
+                    url:'../khohang/list_sp/'
+                    "
                 >
                 <a id="kho-themkho" class="easyui-linkbutton" data-options="iconCls:'icon-add'" onclick="themspkho()">Thêm</a>  
                 <a id="kho-xoakho" class="easyui-linkbutton" data-options="iconCls:'icon-remove'" onclick="xoasanphamkho()">Xóa</a> 
